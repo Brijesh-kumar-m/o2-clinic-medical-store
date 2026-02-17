@@ -1,6 +1,6 @@
-# MediWholesale Pro - Premium Medical Wholesale PWA
+# O2Clinic Medical Store
 
-A high-fidelity pharmaceutical procurement platform built for healthcare professionals.
+The most trusted B2B pharmaceutical platform for clinics and pharmacies. Direct from manufacturers.
 
 ## 🚀 Features
 
@@ -9,6 +9,8 @@ A high-fidelity pharmaceutical procurement platform built for healthcare profess
 - **Wholesale Workflow**: Tiered pricing, GST calculations, and multi-step checkout.
 - **PWA Ready**: Installable on mobile/desktop with offline support.
 - **Zustand State**: Robust session and cart management.
+- **Admin Dashboard**: Manage orders, add products, and view analytics.
+- **User Profiles**: Manage wishlist, order history, and practice details.
 
 ## 🛠️ Setup Instructions
 
@@ -36,8 +38,9 @@ A high-fidelity pharmaceutical procurement platform built for healthcare profess
 - `/src/data`: Medicine mock database.
 
 ## 🔐 Credentials (Simulated)
-- Standard Login: Use any valid email format.
-- Registration: Requires medical license number.
+- **Standard Login**: Use any valid email format.
+- **Admin Login**: Use the "Secret Admin Login" button on the login page.
+- **Registration**: Requires medical license number.
 
 ---
-Produced by Antigravity AI.
+Produced by Antigravity AI & Dr. Ashish Maurya.
