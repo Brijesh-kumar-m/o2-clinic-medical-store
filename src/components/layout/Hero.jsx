@@ -1,0 +1,135 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
+import { ArrowRight, ShieldCheck, Truck, Zap, Activity, Search } from 'lucide-react';
+
+const Hero = () => {
+
+  return (
+    <section className="relative w-full overflow-hidden bg-surface-bg pt-8 pb-12 lg:pt-16 lg:pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="z-10 flex flex-col items-start text-left">
+            <Badge variant="outline" className="mb-6 px-4 py-1.5 text-xs font-semibold tracking-wider text-brand-primary border-brand-primary/20 bg-brand-primary/5 rounded-full uppercase">
+              <Activity className="w-3 h-3 mr-2" />
+              MCI & Drug License Verified Partner
+            </Badge>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-txt-dark leading-[1.1] mb-6 tracking-tight">
+              Procure <span className="text-brand-primary">Genuine</span> <br />
+              Medicines Faster.
+            </h1>
+            <p className="text-lg sm:text-xl text-txt-secondary mb-8 max-w-lg leading-relaxed font-light">
+              The most trusted B2B pharmaceutical platform for clinics and pharmacies.
+              <span className="font-semibold text-txt-dark"> Direct from manufacturers.</span>
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-12">
+              <Link to="/products" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40">
+                  Browse Catalog <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/register" className="w-full sm:w-auto">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base bg-white border-surface-border hover:bg-surface-bg text-txt-dark">
+                  Register Practice
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-8 border-t border-surface-border pt-8 w-full">
+              <div>
+                <p className="text-3xl font-bold text-txt-dark mb-1">50k+</p>
+                <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">SKUs Available</p>
+              </div>
+              <div className="w-px h-10 bg-surface-border"></div>
+              <div>
+                <p className="text-3xl font-bold text-txt-dark mb-1">12k+</p>
+                <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">Verified Doctors</p>
+              </div>
+              <div className="w-px h-10 bg-surface-border"></div>
+              <div>
+                <p className="text-3xl font-bold text-txt-dark mb-1">24hr</p>
+                <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">Avg. Delivery</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative lg:h-[600px] w-full flex items-center justify-center">
+            {/* Abstract background blobs */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-brand-secondary/20 to-transparent blur-3xl opacity-60"></div>
+
+            <div className="relative w-full max-w-md lg:max-w-full">
+              {/* Main Hero Image Container */}
+              <div className="relative z-10 bg-white p-2 rounded-3xl shadow-2xl rotate-[-2deg] hover:rotate-0 transition-all duration-700 ease-out border border-white/50">
+                <img
+                  src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=2938&auto=format&fit=crop"
+                  alt="Pharmaceutical Logistics"
+                  className="w-full h-auto rounded-2xl object-cover aspect-[4/3]"
+                />
+
+                {/* Floating Badge 1 */}
+                <div className="absolute top-8 -right-8 bg-white p-4 rounded-xl shadow-xl border border-surface-border flex items-center gap-3 animate-bounce-slow">
+                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-txt-dark">FDA Approved</p>
+                    <p className="text-[10px] text-txt-secondary">100% Compliant</p>
+                  </div>
+                </div>
+
+                {/* Floating Badge 2 */}
+                <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-surface-border flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-brand-primary">
+                    <Truck size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-txt-dark">Cold Chain</p>
+                    <p className="text-[10px] text-txt-secondary">Temperature Controlled</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const CategoryStrip = () => {
+  // Medical categories with clinical styling
+  const categories = [
+    { name: "Antibiotics", icon: "💊", count: "1.2k+ Prods" },
+    { name: "Cardiology", icon: "🫀", count: "800+ Prods" },
+    { name: "Diabetology", icon: "🩸", count: "500+ Prods" },
+    { name: "Respiratory", icon: "🫁", count: "450+ Prods" },
+    { name: "Gastro", icon: "🧪", count: "300+ Prods" },
+    { name: "Neurology", icon: "🧠", count: "200+ Prods" },
+    { name: "Dermatology", icon: "🧴", count: "600+ Prods" },
+    { name: "Supplements", icon: "⚡", count: "1k+ Prods" }
+  ];
+
+  return (
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-sm border border-surface-border p-4">
+        <div className="flex items-center justify-between overflow-x-auto whitespace-nowrap gap-4 pb-2 md:pb-0 scrollbar-hide">
+          {categories.map((cat, idx) => (
+            <Link key={idx} to={`/products?category=${encodeURIComponent(cat.name)}`} className="flex flex-col items-center justify-center gap-2 min-w-[100px] p-3 rounded-xl hover:bg-surface-bg transition-colors group cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-surface-bg group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-surface-border flex items-center justify-center text-2xl transition-all">
+                {cat.icon}
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-semibold text-txt-dark group-hover:text-brand-primary transition-colors">{cat.name}</p>
+                <p className="text-[10px] text-txt-placeholder group-hover:text-txt-secondary">{cat.count}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export { Hero, CategoryStrip };

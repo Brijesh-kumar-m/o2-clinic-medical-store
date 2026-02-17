@@ -1,0 +1,279 @@
+@import "tailwindcss";
+
+/* ============================================
+   Tailwind v4: Custom Theme Configuration
+   All custom design tokens defined here via @theme
+   ============================================ */
+@theme {
+  /* Brand Colors - Medical/Clinical Palette */
+  --color-brand-primary: #0284C7;
+  /* Deep Sky Blue - Trust & Professionalism */
+  --color-brand-secondary: #0D9488;
+  /* Teal - Healing & Calm */
+  --color-brand-accent: #0F172A;
+  /* Slate - Authority & Stability */
+
+  /* Medical Semantic Colors */
+  --color-medical-success: #059669;
+  /* Emerald - Health & Safety */
+  --color-medical-warning: #D97706;
+  /* Amber - Caution */
+  --color-medical-error: #DC2626;
+  /* Red - Critical/Emergency */
+  --color-medical-info: #2563EB;
+  /* Royal Blue - Information */
+
+  /* Surface Colors */
+  --color-surface-bg: #F8FAFC;
+  /* Slate-50 - Clean, Sterile Background */
+  --color-surface-light: #FFFFFF;
+  /* Pure White - Cards & Containers */
+  --color-surface-border: #E2E8F0;
+  /* Slate-200 - Subtle Separation */
+  --color-surface-disabled: #CBD5E1;
+  /* Slate-300 */
+
+  /* Text Colors */
+  --color-txt-placeholder: #94A3B8;
+  /* Slate-400 */
+  --color-txt-secondary: #64748B;
+  /* Slate-500 - Body Text */
+  --color-txt-body: #475569;
+  /* Slate-600 - Primary Content */
+  --color-txt-heading: #1E293B;
+  /* Slate-800 - Headlines */
+  --color-txt-dark: #0F172A;
+  /* Slate-900 - High Contrast */
+  --color-txt-primary: #0F172A;
+
+  /* Font Family - Clean & Modern */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Box Shadow - Soft & Elevated */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 10px 10px -5px rgba(15, 23, 42, 0.02);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradient Utilities */
+@utility bg-gradient-primary {
+  background-image: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+}
+
+@utility bg-gradient-success {
+  background-image: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+@utility bg-gradient-premium {
+  /* Deep Blue/Teal Gradient for Professional feel */
+  background-image: linear-gradient(135deg, #0F172A 0%, #0E7490 100%);
+}
+
+@utility bg-gradient-subtle {
+  background-image: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+}
+
+@utility bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
+@utility gradient-text {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+@layer base {
+  body {
+    background-color: var(--color-surface-bg);
+    color: var(--color-txt-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-txt-heading);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+}
+
+/* ============================================
+   Component Styles
+   ============================================ */
+@layer components {
+
+  /* Buttons */
+  .btn-primary {
+    background-image: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    /* Standardized padding */
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+    filter: brightness(110%);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-image: none;
+    background-color: var(--color-surface-disabled);
+  }
+
+  .btn-secondary {
+    background-color: white;
+    border: 1px solid var(--color-surface-border);
+    color: var(--color-txt-heading);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-surface-bg);
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+  }
+
+  /* Cards */
+  .card-premium {
+    background-color: var(--color-surface-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-surface-border);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease-in-out;
+  }
+
+  .card-premium:hover {
+    box-shadow: var(--shadow-xl);
+    border-color: var(--color-brand-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Inputs */
+  .input-standard {
+    width: 100%;
+    border: 1px solid var(--color-surface-border);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    background-color: white;
+    color: var(--color-txt-primary);
+    outline: none;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+  }
+
+  .input-standard:placeholder-shown {
+    border-color: var(--color-surface-border);
+  }
+
+  .input-standard:hover {
+    border-color: var(--color-surface-disabled);
+  }
+
+  .input-standard:focus {
+    border-color: var(--color-brand-primary);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+    /* Ring effect */
+  }
+
+  /* Status Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+
+  .badge-success {
+    background-color: rgba(5, 150, 105, 0.1);
+    color: var(--color-medical-success);
+  }
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-surface-disabled);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-txt-placeholder);
+}
+
+/* Glassmorphism Refined */
+.glass {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
