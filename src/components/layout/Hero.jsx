@@ -19,9 +19,8 @@ const Hero = () => {
               Procure <span className="text-brand-primary">Genuine</span> <br />
               Medicines Faster.
             </h1>
-            <p className="text-lg sm:text-xl text-txt-secondary mb-10 max-w-xl w-full leading-relaxed font-medium">
-              The most trusted B2B pharmaceutical platform for clinics and pharmacies.
-              <span className="font-semibold text-txt-dark"> Direct from manufacturers.</span>
+            <p className="text-lg sm:text-xl text-txt-secondary font-medium whitespace-nowrap mb-8 w-full">
+              The most trusted B2B pharmaceutical platform for clinics and pharmacies. Direct from manufacturers.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto mb-12">
