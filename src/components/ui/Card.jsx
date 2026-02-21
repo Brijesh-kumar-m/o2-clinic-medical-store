@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './Button';
+import { cn } from './variants';
 
 const Card = ({ className, children, ...props }) => {
   return (

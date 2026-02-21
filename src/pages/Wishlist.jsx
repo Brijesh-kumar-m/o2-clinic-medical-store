@@ -4,7 +4,7 @@ import { Heart, ShoppingCart, Trash2, Star, ExternalLink } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { useCartStore } from '../store/useCartStore';
+// useCartStore is unused here
 import { toast } from 'react-hot-toast';
 
 // Demo wishlist data
@@ -56,7 +56,7 @@ const Wishlist = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-8 lg:pt-3 lg:pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>

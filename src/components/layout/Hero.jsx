@@ -7,31 +7,31 @@ import { ArrowRight, ShieldCheck, Truck, Zap, Activity, Search } from 'lucide-re
 const Hero = () => {
 
   return (
-    <section className="relative w-full overflow-hidden bg-surface-bg pt-8 pb-12 lg:pt-16 lg:pb-20">
+    <section className="relative w-full overflow-hidden bg-surface-bg pt-3 pb-16 lg:pt-12 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="z-10 flex flex-col items-start text-left">
+          <div className="z-10 flex flex-col items-start text-left w-full h-full">
             <Badge variant="outline" className="mb-6 px-4 py-1.5 text-xs font-semibold tracking-wider text-brand-primary border-brand-primary/20 bg-brand-primary/5 rounded-full uppercase">
               <Activity className="w-3 h-3 mr-2" />
               MCI & Drug License Verified Partner
             </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-txt-dark leading-[1.1] mb-6 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-txt-dark leading-[1.1] mb-6 tracking-tight w-full">
               Procure <span className="text-brand-primary">Genuine</span> <br />
               Medicines Faster.
             </h1>
-            <p className="text-lg sm:text-xl text-txt-secondary mb-8 max-w-lg leading-relaxed font-light">
+            <p className="text-lg sm:text-xl text-txt-secondary mb-10 max-w-xl w-full leading-relaxed font-medium">
               The most trusted B2B pharmaceutical platform for clinics and pharmacies.
               <span className="font-semibold text-txt-dark"> Direct from manufacturers.</span>
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-12">
+            <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto mb-12">
               <Link to="/products" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40">
+                <Button size="lg" className="w-full sm:w-auto rounded-xl px-10 h-14 text-lg shadow-xl shadow-brand-primary/25 hover:shadow-brand-primary/40 transition-all">
                   Browse Catalog <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link to="/register" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base bg-white border-surface-border hover:bg-surface-bg text-txt-dark">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto rounded-xl px-10 h-14 text-lg bg-white border-2 border-brand-primary/20 hover:border-brand-primary text-txt-dark transition-all">
                   Register Practice
                 </Button>
               </Link>

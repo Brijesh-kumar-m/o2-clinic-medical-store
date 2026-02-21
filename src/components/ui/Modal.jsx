@@ -2,7 +2,7 @@ import React from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { cn } from './Button';
+import { cn } from './variants';
 
 const Modal = ({ isOpen, onClose, title, children, className }) => {
   return (

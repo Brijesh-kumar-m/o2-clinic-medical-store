@@ -28,7 +28,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl py-xl">
+    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl pt-sm pb-xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-xl mb-2xl">
         <div>
           <h1 className="text-3xl font-black text-txt-dark mb-1">Welcome, {user?.profile?.title || 'Dr.'} {user?.profile?.lastName}</h1>

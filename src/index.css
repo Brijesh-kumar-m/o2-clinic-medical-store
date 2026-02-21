@@ -7,47 +7,51 @@
 @theme {
   /* Brand Colors - Medical/Clinical Palette */
   --color-brand-primary: #0284C7;
-  /* Deep Sky Blue - Trust & Professionalism */
+  --color-brand-primary-light: #38BDF8;
+  --color-brand-primary-dark: #0369A1;
   --color-brand-secondary: #0D9488;
-  /* Teal - Healing & Calm */
-  --color-brand-accent: #0F172A;
-  /* Slate - Authority & Stability */
+  --color-brand-accent: #6366F1;
+  /* Indigo for more vibrancy */
 
   /* Medical Semantic Colors */
-  --color-medical-success: #059669;
-  /* Emerald - Health & Safety */
-  --color-medical-warning: #D97706;
-  /* Amber - Caution */
-  --color-medical-error: #DC2626;
-  /* Red - Critical/Emergency */
-  --color-medical-info: #2563EB;
-  /* Royal Blue - Information */
+  --color-medical-success: #10B981;
+  --color-medical-warning: #F59E0B;
+  --color-medical-error: #EF4444;
+  --color-medical-info: #3B82F6;
 
   /* Surface Colors */
   --color-surface-bg: #F8FAFC;
-  /* Slate-50 - Clean, Sterile Background */
   --color-surface-light: #FFFFFF;
-  /* Pure White - Cards & Containers */
   --color-surface-border: #E2E8F0;
-  /* Slate-200 - Subtle Separation */
   --color-surface-disabled: #CBD5E1;
-  /* Slate-300 */
 
   /* Text Colors */
   --color-txt-placeholder: #94A3B8;
-  /* Slate-400 */
   --color-txt-secondary: #64748B;
-  /* Slate-500 - Body Text */
-  --color-txt-body: #475569;
-  /* Slate-600 - Primary Content */
-  --color-txt-heading: #1E293B;
-  /* Slate-800 - Headlines */
-  --color-txt-dark: #0F172A;
-  /* Slate-900 - High Contrast */
-  --color-txt-primary: #0F172A;
+  --color-txt-body: #334155;
+  --color-txt-heading: #0F172A;
+  --color-txt-dark: #020617;
+  --color-txt-primary: #1E293B;
 
-  /* Font Family - Clean & Modern */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Font Family */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+
+  /* Animations */
+  --animate-bounce-slow: bounce-slow 3s infinite;
+
+  @keyframes bounce-slow {
+
+    0%,
+    100% {
+      transform: translateY(-5%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -67,9 +71,12 @@
 
   /* Box Shadow - Soft & Elevated */
   --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
-  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 10px 10px -5px rgba(15, 23, 42, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05),
+  0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05),
+  0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.05),
+  0 10px 10px -5px rgba(15, 23, 42, 0.02);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
 

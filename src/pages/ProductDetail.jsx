@@ -8,10 +8,11 @@ import { Card } from '../components/ui/Card';
 import {
   Plus, Minus, ShoppingCart, Heart, ShieldCheck,
   Truck, Info, AlertCircle, ChevronRight, Star,
-  Package, FlaskConical, Clock, Pill, Thermometer,
+  Package, FlaskConical, Pill, Thermometer,
   Shield, CheckCircle2
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import ProductCard from '../components/features/ProductCard';
 
@@ -54,7 +55,7 @@ const ProductDetail = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-8 lg:pt-3 lg:pb-12">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs font-semibold text-txt-placeholder uppercase tracking-wider mb-8">
         <Link to="/" className="hover:text-brand-primary transition-colors">Home</Link>

@@ -43,7 +43,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-8 lg:pt-3 lg:pb-12">
       {/* Step Progress Bar */}
       <div className="mb-8 lg:mb-12">
         {/* Desktop Stepper */}
@@ -58,8 +58,8 @@ const Checkout = () => {
           {steps.map((step, idx) => (
             <div key={step} className="flex flex-col items-center relative z-10">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-2 transition-all duration-300 ${idx < currentStep ? 'bg-medical-success text-white' :
-                  idx === currentStep ? 'bg-brand-primary text-white ring-4 ring-brand-primary/20' :
-                    'bg-white border-2 border-surface-border text-txt-placeholder'
+                idx === currentStep ? 'bg-brand-primary text-white ring-4 ring-brand-primary/20' :
+                  'bg-white border-2 border-surface-border text-txt-placeholder'
                 }`}>
                 {idx < currentStep ? <CheckCircle2 className="w-5 h-5" /> : idx + 1}
               </div>
@@ -257,8 +257,8 @@ const PaymentMethod = () => {
             key={idx}
             onClick={() => setSelected(idx)}
             className={`flex items-center gap-4 p-5 rounded-xl transition-all text-left ${selected === idx
-                ? 'border-2 border-brand-primary bg-brand-primary/5 shadow-md'
-                : 'border-2 border-surface-border hover:border-brand-primary/40'
+              ? 'border-2 border-brand-primary bg-brand-primary/5 shadow-md'
+              : 'border-2 border-surface-border hover:border-brand-primary/40'
               }`}
           >
             <div className="w-12 h-12 bg-white rounded-xl border border-surface-border flex items-center justify-center shrink-0">

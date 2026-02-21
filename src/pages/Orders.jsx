@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { Package, Truck, CheckCircle2, Clock, ChevronRight, Search, Filter, ArrowRight } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 
 const Orders = () => {
@@ -68,7 +69,7 @@ const Orders = () => {
     : orders.filter(o => o.status.toLowerCase().replace(' ', '') === activeTab);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-8 lg:pt-3 lg:pb-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-txt-dark mb-2">My Orders</h1>
@@ -96,8 +97,8 @@ const Orders = () => {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-full font-medium text-sm capitalize transition-all whitespace-nowrap ${activeTab === tab
-                ? 'bg-brand-primary text-white shadow-md'
-                : 'bg-white border border-surface-border text-txt-secondary hover:bg-surface-light'
+              ? 'bg-brand-primary text-white shadow-md'
+              : 'bg-white border border-surface-border text-txt-secondary hover:bg-surface-light'
               }`}
           >
             {tab}

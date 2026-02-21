@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -11,8 +11,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const Login = () => {
-  const [isRegistering, setIsRegistering] = useState(false);
+const Login = ({ mode }) => {
+  const [searchParams] = useSearchParams();
+  const [isRegistering, setIsRegistering] = useState(mode === 'register' || searchParams.get('mode') === 'register');
   const { login } = useAuthStore();
   const navigate = useNavigate();
 

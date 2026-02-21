@@ -36,7 +36,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl py-xl">
+    <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl pt-sm pb-xl">
       <div className="flex justify-between items-end mb-2xl">
         <div>
           <h1 className="text-3xl font-extrabold text-txt-dark mb-2">Shopping Cart</h1>

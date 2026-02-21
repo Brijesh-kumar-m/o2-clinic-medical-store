@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { ArrowRight, Activity, TrendingUp, Clock, ShieldCheck, Truck, Percent, Stethoscope } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import StockAlertsMockup from '../components/features/StockAlertsMockup';
 
 const Home = () => {
   // Filter for featured and best deals
@@ -102,45 +103,48 @@ const Home = () => {
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-primary/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
 
-            <div className="relative z-10 max-w-xl">
-              <Badge variant="secondary" className="mb-4 bg-brand-primary/20 text-brand-primary border-brand-primary/20 backdrop-blur-md">
-                Exclusive for Clinics
+            <div className="relative z-10 lg:w-3/5 text-left py-4">
+              <Badge variant="secondary" className="mb-8 bg-white/10 text-brand-primary-light border-white/10 backdrop-blur-xl px-5 py-2 inline-flex items-center gap-2 rounded-full border">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-primary-light animate-pulse" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Predictive Intelligence</span>
               </Badge>
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white leading-tight">
-                Optimize Your <span className="text-brand-primary">Inventory</span>
+
+              <h2 className="text-4xl md:text-6xl font-extrabold mb-8 text-white leading-[1.1] tracking-tight">
+                Optimize Your <br className="hidden md:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary-light to-brand-secondary">Inventory</span>
               </h2>
-              <p className="text-slate-300 text-lg mb-8 leading-relaxed">
-                Join over 5,000+ clinics using our automated inventory prediction to reduce wastage and stockouts.
+
+              <p className="text-slate-400 text-lg md:text-xl mb-12 leading-relaxed max-w-xl">
+                Empower your clinic with real-time analytics. Join 5,000+ medical leaders reducing waste by 40% with O2Clinic’s smart replenishment engine.
               </p>
-              <div className="flex gap-4">
-                <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white border-none px-8">
-                  Start Free Trial
-                </Button>
-                <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                  Watch Demo
-                </Button>
+
+              <div className="flex flex-col sm:flex-row gap-5">
+                <Link to="/login?mode=register" className="group">
+                  <Button size="lg" className="w-full sm:w-auto bg-brand-primary hover:bg-brand-primary-dark text-white border-none px-10 h-14 font-bold shadow-2xl shadow-brand-primary/30 transition-all duration-300 hover:-translate-y-1">
+                    Get Started Free
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link to="/login" className="group">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/20 text-white hover:bg-white/20 bg-white/5 backdrop-blur-md px-10 h-14 font-bold transition-all duration-300">
+                    Explore Demo
+                  </Button>
+                </Link>
               </div>
             </div>
 
             {/* Decorative UI Mockup Area */}
-            <div className="hidden md:block relative z-10 w-1/3">
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 transform rotate-6 hover:rotate-0 transition-all duration-500">
-                <div className="flex items-center gap-4 mb-4 border-b border-white/10 pb-4">
-                  <Activity className="text-brand-primary" />
-                  <div>
-                    <h4 className="text-white font-bold">Stock Alert</h4>
-                    <p className="text-xs text-slate-400">Reorder Level Reached</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="h-2 bg-white/10 rounded-full w-3/4"></div>
-                  <div className="h-2 bg-white/10 rounded-full w-1/2"></div>
-                </div>
+            <div className="hidden lg:block relative z-10 lg:w-2/5">
+              <div className="relative transform rotate-2 hover:rotate-0 transition-all duration-700 ease-out">
+                {/* Visual Glow behind mockup */}
+                <div className="absolute -inset-10 bg-brand-primary/20 rounded-full blur-[100px] -z-10" />
+                <StockAlertsMockup />
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Popular Medicines */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 w-full">

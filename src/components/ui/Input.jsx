@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './Button';
+import { cn } from './variants';
 
 const Input = React.forwardRef(({ className, type, label, error, ...props }, ref) => {
   return (
