@@ -114,7 +114,7 @@ const Home = () => {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary-light to-brand-secondary">Inventory</span>
               </h2>
 
-              <p className="text-slate-400 text-lg md:text-xl mb-12 leading-relaxed max-w-xl">
+              <p className="text-slate-400 text-lg md:text-xl mb-12 leading-relaxed">
                 Empower your clinic with real-time analytics. Join 5,000+ medical leaders reducing waste by 40% with O2Clinic’s smart replenishment engine.
               </p>
 

@@ -41,17 +41,17 @@ const Layout = () => {
 
           {/* Top Section: Newsletter & Brand */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 items-center">
-            <div className="space-y-6">
-              <Link to="/" className="inline-block">
+            <div className="lg:pr-12">
+              <Link to="/" className="inline-block mb-6">
                 <Logo variant="white" className="w-14 h-14" />
               </Link>
-              <h2 className="text-4xl font-black tracking-tight leading-tight text-white">
+              <h2 className="text-4xl font-black tracking-tight leading-tight text-white mb-6">
                 Empowering Healthcare <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-blue-400">
                   One Order at a Time.
                 </span>
               </h2>
-              <p className="text-slate-400 text-lg max-w-md w-full leading-relaxed">
+              <p className="text-slate-400 text-lg leading-relaxed max-w-lg">
                 Join over <span className="text-white font-bold">5,000+</span> clinics and pharmacies streamlining their supply chain with O2Clinic.
               </p>
             </div>

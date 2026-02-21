@@ -79,7 +79,9 @@ const Wishlist = () => {
             <Heart className="w-10 h-10 text-txt-placeholder" />
           </div>
           <h2 className="text-xl font-bold text-txt-dark mb-2">Your wishlist is empty</h2>
-          <p className="text-txt-secondary mb-6 max-w-sm mx-auto">Save medicines you're interested in to quickly access them later.</p>
+          <p className="text-txt-secondary mb-6 max-w-md mx-auto px-4">
+            Save medicines you're interested in to quickly access them later.
+          </p>
           <Link to="/products">
             <Button className="rounded-full px-8">Browse Medicines</Button>
           </Link>

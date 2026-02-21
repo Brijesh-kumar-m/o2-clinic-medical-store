@@ -10,19 +10,20 @@ const Hero = () => {
     <section className="relative w-full overflow-hidden bg-surface-bg pt-3 pb-16 lg:pt-12 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="z-10 flex flex-col items-start text-left w-full h-full">
+          <div className="z-10 flex flex-col text-left w-full h-full">
             <Badge variant="outline" className="mb-6 px-4 py-1.5 text-xs font-semibold tracking-wider text-brand-primary border-brand-primary/20 bg-brand-primary/5 rounded-full uppercase">
               <Activity className="w-3 h-3 mr-2" />
               MCI & Drug License Verified Partner
             </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-txt-dark leading-[1.1] mb-6 tracking-tight w-full">
-              Procure <span className="text-brand-primary">Genuine</span> <br />
-              Medicines Faster.
-            </h1>
-            <p className="text-lg sm:text-xl text-txt-secondary mb-10 max-w-xl w-full leading-relaxed font-medium">
-              The most trusted B2B pharmaceutical platform for clinics and pharmacies.
-              <span className="font-semibold text-txt-dark"> Direct from manufacturers.</span>
-            </p>
+            <div className="w-full">
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-txt-dark leading-[1.1] mb-6 tracking-tight">
+                Procure <span className="text-brand-primary">Genuine</span> <br />
+                Medicines Faster.
+              </h1>
+              <p className="text-lg sm:text-xl text-txt-secondary mb-10 leading-relaxed font-medium max-w-2xl">
+                The most trusted B2B pharmaceutical platform for clinics and pharmacies. Direct from manufacturers.
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto mb-12">
               <Link to="/products" className="w-full sm:w-auto">

@@ -25,7 +25,7 @@ const Cart = () => {
           <ShoppingBag className="w-12 h-12" />
         </div>
         <h2 className="text-3xl font-extrabold text-txt-dark mb-4">Your Wholesale Cart is Empty</h2>
-        <p className="text-txt-secondary mb-xl max-w-md mx-auto">
+        <p className="text-txt-secondary mb-xl max-w-lg mx-auto px-4">
           Add medical supplies to your cart to proceed with procurement. Verified practices get bulk discounts.
         </p>
         <Link to="/products">
