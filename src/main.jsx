@@ -4,7 +4,6 @@ import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 
-console.log('App initializing...');
 const root = createRoot(document.getElementById('root'));
 
 root.render(
@@ -15,7 +14,6 @@ root.render(
   </StrictMode>,
 );
 
-/*
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -24,4 +22,3 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('SW Reg Failed!', err));
   });
 }
-*/

@@ -4,7 +4,6 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { Package, Truck, CheckCircle2, Clock, ChevronRight, Search, Filter, ArrowRight } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 
 const Orders = () => {

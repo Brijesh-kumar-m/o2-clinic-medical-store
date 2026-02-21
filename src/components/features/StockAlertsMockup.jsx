@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Activity, AlertTriangle, Package, TrendingDown } from 'lucide-react';
 import { medicines } from '../../data/medicines';
