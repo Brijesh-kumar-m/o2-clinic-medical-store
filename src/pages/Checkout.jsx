@@ -196,9 +196,9 @@ const Checkout = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0: return <ReviewCart items={items} subtotal={subtotal} tax={tax} shipping={shipping} total={total} />;
+      case 0: return <ReviewCart items={items} subtotal={subtotal} tax={tax} shipping={shipping} total={total} gstRate={gstRate} />;
       case 1: return <AddressForm setAddress={setAddress} address={address} phone={phone} setPhone={setPhone} />;
-      case 2: return <PrescriptionUpload file={prescriptionFile} setFile={setPrescriptionFile} />;
+      case 2: return <PrescriptionUpload file={prescriptionFile} setFile={setPrescriptionFile} onSkip={nextStep} />;
       case 3: return <PaymentMethod setPaymentMethod={setPaymentMethod} paymentMethod={paymentMethod} />;
       case 4: return <FinalReview total={total} items={items} address={address} paymentMethod={paymentMethod} />;
       default: return null;
@@ -285,7 +285,7 @@ const Checkout = () => {
 
 /* ---- Step Components ---- */
 
-const ReviewCart = ({ items, subtotal, tax, shipping, total }) => (
+const ReviewCart = ({ items, subtotal, tax, shipping, total, gstRate }) => (
   <div className="space-y-6">
     <h2 className="text-xl font-bold flex items-center gap-2"><Package className="text-brand-primary" /> Review Items</h2>
 
@@ -395,17 +395,25 @@ const AddressForm = ({ setAddress, address, phone, setPhone }) => {
   );
 };
 
-const PrescriptionUpload = ({ file, setFile }) => {
+const PrescriptionUpload = ({ file, setFile, onSkip }) => {
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
   };
 
+  const handleSkipOrRemove = () => {
+    if (file) {
+      setFile(null);
+    } else {
+      onSkip();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold flex items-center gap-2"><UploadCloud className="text-brand-primary" /> Upload Prescriptions</h2>
-      <p className="text-sm text-txt-secondary max-w-lg">Some items in your cart may require a valid prescription from a registered medical practitioner.</p>
+      <p className="text-sm text-txt-secondary">Some items in your cart may require a valid prescription <br /> from a registered medical practitioner.</p>
 
       <div 
         className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-colors cursor-pointer text-center relative ${file ? 'border-medical-success bg-green-50' : 'border-surface-border hover:border-brand-primary bg-surface-bg/30'}`}
@@ -424,7 +432,7 @@ const PrescriptionUpload = ({ file, setFile }) => {
         <p className="text-[10px] uppercase font-black text-txt-placeholder mt-4 tracking-wider">JPG, PNG, PDF — Max 5MB</p>
       </div>
 
-      <Button variant="outline" className="w-full sm:w-auto" onClick={() => setFile(null)}>
+      <Button variant="outline" className="w-full sm:w-auto" onClick={handleSkipOrRemove}>
         {file ? 'Remove File' : 'Skip for Now'}
       </Button>
     </div>
