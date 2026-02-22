@@ -51,8 +51,9 @@ const Layout = () => {
                   One Order at a Time.
                 </span>
               </h2>
-              <p className="text-slate-400 text-lg leading-relaxed max-w-lg">
-                Join over <span className="text-white font-bold">5,000+</span> clinics and pharmacies streamlining their supply chain with O2Clinic.
+              <p className="text-slate-400 text-lg leading-relaxed">
+                Join over <span className="text-white font-bold">5,000+</span> clinics and pharmacies <br />
+                streamlining their supply chain with O2Clinic.
               </p>
             </div>
 

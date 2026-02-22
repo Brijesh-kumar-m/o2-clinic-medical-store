@@ -37,7 +37,7 @@ export const useCartStore = create(
               brand: product.brand,
               manufacturer: product.manufacturer,
               category: product.category,
-              packSizes: product.pack_sizes,
+              packSizes: product.pack_sizes || [],
               images: product.images,
               // Cart specific
               quantity: item.quantity,

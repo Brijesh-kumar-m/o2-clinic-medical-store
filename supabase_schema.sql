@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS products (
   indications TEXT,
   side_effects TEXT,
   storage TEXT,
+  rating NUMERIC DEFAULT 0,
+  review_count INTEGER DEFAULT 0,
   featured BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -5,9 +5,10 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { toast } from 'react-hot-toast';
-import { supabase } from '../lib/supabase';
+import { supabase, isMockMode } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCartStore } from '../store/useCartStore';
+import { mockProducts } from '../lib/mockData';
 
 const Wishlist = () => {
   const [items, setItems] = useState([]);
@@ -27,6 +28,42 @@ const Wishlist = () => {
   const fetchWishlist = async () => {
     try {
       setLoading(true);
+
+      if (isMockMode) {
+        // Handle Mock Mode
+        const storedWishlist = JSON.parse(localStorage.getItem('mock_wishlist') || '[]');
+        const userWishlistIds = storedWishlist
+          .filter(item => item.userId === user.id)
+          .map(item => item.productId);
+
+        const mockItems = mockProducts
+          .filter(p => userWishlistIds.includes(p.id))
+          .map(product => {
+             const mainPack = product.pack_sizes && product.pack_sizes.length > 0 ? product.pack_sizes[0] : { price: 0, mrp: 0, discount: 0 };
+             return {
+              id: product.id,
+              wishlistId: `mock-wishlist-${product.id}`,
+              name: product.name,
+              genericName: product.generic_name,
+              manufacturer: product.manufacturer?.name || 'Unknown',
+              price: mainPack.price,
+              mrp: mainPack.mrp,
+              discount: mainPack.discount,
+              rating: product.rating || 0,
+              inStock: product.stock > 0,
+              image: product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop',
+              brand: product.brand,
+              category: product.category,
+              packSizes: product.pack_sizes || [],
+              rawManufacturer: product.manufacturer
+             };
+          });
+          
+        setItems(mockItems);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('wishlist')
         .select(`
@@ -47,7 +84,11 @@ const Wishlist = () => {
 
       if (error) throw error;
 
-      const mappedItems = data.map(item => {
+      console.log('Wishlist raw data:', data);
+
+      const mappedItems = data
+        .filter(item => item.product) // Filter out items where product is null
+        .map(item => {
         const product = item.product;
         const mainPack = product.pack_sizes && product.pack_sizes.length > 0 ? product.pack_sizes[0] : { price: 0, mrp: 0, discount: 0 };
         return {
@@ -160,7 +201,7 @@ const Wishlist = () => {
             <Heart className="w-10 h-10 text-txt-placeholder" />
           </div>
           <h2 className="text-xl font-bold text-txt-dark mb-2">Your wishlist is empty</h2>
-          <p className="text-txt-secondary mb-6 max-w-md mx-auto px-4">
+          <p className="text-txt-secondary mb-6">
             Save medicines you're interested in to quickly access them later.
           </p>
           <Link to="/products">

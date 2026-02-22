@@ -31,8 +31,9 @@ const Cart = () => {
           <ShoppingBag className="w-12 h-12" />
         </div>
         <h2 className="text-3xl font-extrabold text-txt-dark mb-4">Your Wholesale Cart is Empty</h2>
-        <p className="text-txt-secondary mb-xl max-w-lg mx-auto px-4">
-          Add medical supplies to your cart to proceed with procurement. Verified practices get bulk discounts.
+        <p className="text-txt-secondary mb-xl">
+          Add medical supplies to your cart to proceed with procurement. <br />
+          Verified practices get bulk discounts.
         </p>
         <Link to="/products">
           <Button size="lg" className="rounded-full px-12">Browse Medicines</Button>
@@ -66,7 +67,7 @@ const Cart = () => {
         {/* Cart Items */}
         <div className="lg:col-span-8 space-y-md">
           {items.map((item) => {
-            const pack = item.packSizes.find(p => p.size === item.selectedPackSize);
+            const pack = item.packSizes?.find(p => p.size === item.selectedPackSize);
             if (!pack) return null; // Skip invalid items
             return (
               <Card key={`${item.id}-${item.selectedPackSize}`} className="overflow-hidden p-0 border-surface-border hover:shadow-lg transition-all">
@@ -77,6 +78,10 @@ const Cart = () => {
                         src={item.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop'}
                         alt={item.name}
                         className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.target.onerror = null; 
+                          e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop';
+                        }}
                       />
                     </div>
 

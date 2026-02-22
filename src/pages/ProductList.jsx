@@ -41,6 +41,15 @@ const ProductList = () => {
   useEffect(() => {
     if (user) {
       const fetchWishlistIds = async () => {
+        if (isMockMode) {
+          const storedWishlist = JSON.parse(localStorage.getItem('mock_wishlist') || '[]');
+          const userWishlist = storedWishlist
+            .filter(item => item.userId === user.id)
+            .map(item => item.productId);
+          setWishlistIds(new Set(userWishlist));
+          return;
+        }
+
         const { data, error } = await supabase
           .from('wishlist')
           .select('product_id')
@@ -62,6 +71,37 @@ const ProductList = () => {
     
     if (!user) {
       toast.error('Please login to manage wishlist');
+      return;
+    }
+
+    if (isMockMode) {
+      const storedWishlist = JSON.parse(localStorage.getItem('mock_wishlist') || '[]');
+      
+      if (wishlistIds.has(productId)) {
+        // Remove
+        const newWishlist = storedWishlist.filter(
+          item => !(item.userId === user.id && item.productId === productId)
+        );
+        localStorage.setItem('mock_wishlist', JSON.stringify(newWishlist));
+        
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+        toast.success('Removed from wishlist');
+      } else {
+        // Add
+        const newWishlist = [...storedWishlist, { userId: user.id, productId }];
+        localStorage.setItem('mock_wishlist', JSON.stringify(newWishlist));
+        
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.add(productId);
+          return newSet;
+        });
+        toast.success('Added to wishlist');
+      }
       return;
     }
 
@@ -147,7 +187,7 @@ const ProductList = () => {
             subCategory: p.sub_category,
             composition: p.composition,
             dosageForm: p.dosage_form,
-            packSizes: p.pack_sizes,
+            packSizes: p.pack_sizes || [],
             prescriptionRequired: p.prescription_required,
             schedule: p.schedule,
             stock: p.stock,

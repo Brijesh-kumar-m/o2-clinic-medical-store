@@ -117,7 +117,7 @@ const ProductDetail = () => {
         subCategory: data.sub_category,
         composition: data.composition,
         dosageForm: data.dosage_form,
-        packSizes: data.pack_sizes,
+        packSizes: data.pack_sizes || [],
         prescriptionRequired: data.prescription_required,
         schedule: data.schedule,
         stock: data.stock,
@@ -133,7 +133,7 @@ const ProductDetail = () => {
       };
 
       setProduct(mappedProduct);
-      setSelectedPack(mappedProduct.packSizes[0]);
+      setSelectedPack(mappedProduct.packSizes && mappedProduct.packSizes.length > 0 ? mappedProduct.packSizes[0] : { price: 0, mrp: 0, discount: 0, size: 'Standard' });
       fetchRelatedProducts(mappedProduct.category, mappedProduct.id);
 
     } catch (error) {
@@ -233,6 +233,10 @@ const ProductDetail = () => {
               src={product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop'}
               alt={product.name}
               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop';
+              }}
             />
           </div>
           <div className="grid grid-cols-4 gap-4">
@@ -241,6 +245,10 @@ const ProductDetail = () => {
                 <img
                   src={product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop'}
                   className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity mix-blend-multiply"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=150&auto=format&fit=crop';
+                  }}
                 />
               </div>
             ))}

@@ -70,6 +70,10 @@ const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
             src={product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop'}
             alt={product.name}
             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out mix-blend-multiply"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop';
+            }}
           />
         </div>
 
