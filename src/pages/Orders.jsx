@@ -1,49 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase, isMockMode } from '../lib/supabase';
+import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
-import { Package, Truck, CheckCircle2, Clock, ChevronRight, Search, Filter, ArrowRight } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, ChevronRight, Search, Filter, ArrowRight, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
 const Orders = () => {
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('all');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy order data
-  const orders = [
-    {
-      id: 'ORD-2024-8832',
-      date: 'Feb 16, 2026',
-      total: 12450,
-      status: 'In Transit',
-      items: 8,
-      estimatedDelivery: 'Feb 18, 2026',
-    },
-    {
-      id: 'ORD-2024-8831',
-      date: 'Feb 10, 2026',
-      total: 4500,
-      status: 'Delivered',
-      items: 3,
-      estimatedDelivery: 'Feb 12, 2026',
-    },
-    {
-      id: 'ORD-2024-8100',
-      date: 'Jan 28, 2026',
-      total: 28900,
-      status: 'Delivered',
-      items: 12,
-      estimatedDelivery: 'Jan 30, 2026',
-    },
-    {
-      id: 'ORD-2024-7554',
-      date: 'Jan 15, 2026',
-      total: 1560,
-      status: 'Cancelled',
-      items: 1,
-      estimatedDelivery: 'N/A',
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
     }
-  ];
+  }, [user]);
+
+  const fetchOrders = async () => {
+    try {
+      let data;
+      
+      if (isMockMode) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        data = [
+          {
+            id: 'ORD-MOCK-001',
+            created_at: new Date().toISOString(),
+            total_amount: 1540,
+            status: 'in transit',
+            prescription_url: null,
+            order_items: new Array(2)
+          },
+          {
+            id: 'ORD-MOCK-002',
+            created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+            total_amount: 850,
+            status: 'delivered',
+            prescription_url: 'mock-url',
+            order_items: new Array(1)
+          }
+        ];
+      } else {
+        const { data: supabaseData, error } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (*)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        data = supabaseData;
+      }
+
+      const formattedOrders = data.map(order => ({
+        id: order.id,
+        date: new Date(order.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }),
+        total: order.total_amount,
+        status: order.status.charAt(0).toUpperCase() + order.status.slice(1),
+        items: order.order_items.length,
+        hasPrescription: !!order.prescription_url,
+        estimatedDelivery: new Date(new Date(order.created_at).setDate(new Date(order.created_at).getDate() + 3)).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }),
+      }));
+
+      setOrders(formattedOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -128,6 +170,12 @@ const Orders = () => {
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {order.date}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                         <span>{order.items} Items</span>
+                        {order.hasPrescription && (
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span className="flex items-center gap-1 text-brand-primary font-medium"><FileText className="w-3 h-3" /> Prescription</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

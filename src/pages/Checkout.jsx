@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ChevronRight, CreditCard, Home, MapPin, Package, Smartphone, UploadCloud, ArrowLeft } from 'lucide-react';
@@ -6,37 +7,200 @@ import { Input } from '../components/ui/Input';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useCartStore } from '../store/useCartStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { supabase, isMockMode } from '../lib/supabase';
 
 const steps = ['Cart', 'Address', 'Prescription', 'Payment', 'Confirm'];
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const { items, getSubtotal, clearCart } = useCartStore();
+  const { user, profile } = useAuthStore();
+  const { gstRate, shippingCharge, freeShippingThreshold, fetchSettings } = useSettingsStore();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [address, setAddress] = useState(profile?.address || profile?.practice_address || "");
+  const [phone, setPhone] = useState(profile?.phone || "");
+  const [paymentMethod, setPaymentMethod] = useState("UPI / GPay / PhonePe");
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
+
+  React.useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const subtotal = getSubtotal();
-  const tax = subtotal * 0.12;
-  const shipping = subtotal > 5000 ? 0 : 150;
+  const tax = subtotal * (gstRate / 100);
+  const shipping = subtotal > freeShippingThreshold ? 0 : shippingCharge;
   const total = subtotal + tax + shipping;
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
-  const handlePlaceOrder = () => {
-    clearCart();
-    toast.success('Order placed successfully! 🎉');
-    navigate('/orders');
+  const handlePlaceOrder = async () => {
+    if (!user) {
+        toast.error("You must be logged in to place an order.");
+        return;
+    }
+
+    if (!phone) {
+        toast.error("Please provide a phone number for order verification.");
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+        if (isMockMode) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Validate prescription if present (mock)
+            if (prescriptionFile) {
+                 if (prescriptionFile.size > 5 * 1024 * 1024) {
+                    toast.error('File size exceeds 5MB limit.');
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            clearCart();
+            toast.success('Order placed successfully! (Mock Mode) 🎉');
+            navigate('/orders');
+            setLoading(false);
+            return;
+        }
+
+        let prescriptionUrl = null;
+
+        // 0. Upload Prescription if exists
+        if (prescriptionFile) {
+            // Validate file size (max 5MB)
+            if (prescriptionFile.size > 5 * 1024 * 1024) {
+                toast.error('File size exceeds 5MB limit.');
+                setLoading(false);
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(prescriptionFile.type)) {
+                toast.error('Invalid file type. Please upload an image (JPEG, PNG, WEBP) or PDF.');
+                setLoading(false);
+                return;
+            }
+
+            const fileExt = prescriptionFile.name.split('.').pop();
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+            const { error: uploadError } = await supabase.storage
+                .from('prescriptions')
+                .upload(fileName, prescriptionFile);
+
+            if (uploadError) {
+                console.error('Prescription upload failed:', uploadError);
+                toast.error('Failed to upload prescription. Please try again.');
+                setLoading(false);
+                return;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('prescriptions')
+                .getPublicUrl(fileName);
+            
+            prescriptionUrl = publicUrl;
+        }
+
+        // 1. Verify Stock
+        for (const item of items) {
+            const { data: product, error } = await supabase
+                .from('products')
+                .select('stock, name')
+                .eq('id', item.id)
+                .single();
+            
+            if (error) {
+                 console.error(`Error verifying stock for ${item.name}:`, error);
+                 toast.error(`Could not verify stock for ${item.name}. Please try again.`);
+                 setLoading(false);
+                 return;
+            }
+
+            if (product.stock < item.quantity) {
+                toast.error(`Insufficient stock for ${product.name}. Available: ${product.stock}`);
+                setLoading(false);
+                return;
+            }
+        }
+
+        // 2. Create Order
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .insert({
+                user_id: user.id,
+                total_amount: total,
+                status: 'pending',
+                shipping_address: address,
+                phone: phone,
+                prescription_url: prescriptionUrl
+            })
+            .select()
+            .single();
+
+        if (orderError) throw orderError;
+
+        // 3. Create Order Items
+        const orderItems = items.map(item => {
+             const pack = item.packSizes?.find(p => p.size === item.selectedPackSize);
+             return {
+                order_id: order.id,
+                product_id: item.id,
+                product_name: item.name,
+                pack_size: item.selectedPackSize,
+                quantity: item.quantity,
+                price: pack ? pack.price : 0
+             };
+        });
+
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+
+        // 4. Update Stock (Using atomic RPC)
+        for (const item of items) {
+             const { error: stockError } = await supabase.rpc('decrement_stock', { 
+                 product_id: item.id, 
+                 qty: item.quantity 
+             });
+             
+             if (stockError) {
+                console.error(`Failed to update stock for ${item.name}:`, stockError);
+                // We should ideally rollback the order here or alert admin
+             }
+        }
+
+        clearCart();
+        toast.success('Order placed successfully! 🎉');
+        navigate('/orders');
+
+    } catch (error) {
+        console.error('Order placement failed:', error);
+        toast.error('Failed to place order. Please try again.');
+    } finally {
+        setLoading(false);
+    }
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 0: return <ReviewCart items={items} subtotal={subtotal} tax={tax} shipping={shipping} total={total} />;
-      case 1: return <AddressForm />;
-      case 2: return <PrescriptionUpload />;
-      case 3: return <PaymentMethod />;
-      case 4: return <FinalReview total={total} items={items} />;
+      case 1: return <AddressForm setAddress={setAddress} address={address} phone={phone} setPhone={setPhone} />;
+      case 2: return <PrescriptionUpload file={prescriptionFile} setFile={setPrescriptionFile} />;
+      case 3: return <PaymentMethod setPaymentMethod={setPaymentMethod} paymentMethod={paymentMethod} />;
+      case 4: return <FinalReview total={total} items={items} address={address} paymentMethod={paymentMethod} />;
       default: return null;
     }
   };
@@ -101,17 +265,18 @@ const Checkout = () => {
         <Button
           variant="outline"
           onClick={prevStep}
-          disabled={currentStep === 0}
+          disabled={currentStep === 0 || loading}
           className="order-2 sm:order-1 gap-2"
         >
           <ArrowLeft className="w-4 h-4" /> Previous
         </Button>
         <Button
           onClick={currentStep === steps.length - 1 ? handlePlaceOrder : nextStep}
+          disabled={loading}
           className="order-1 sm:order-2 px-8 h-12 gap-2 text-base font-bold"
         >
-          {currentStep === steps.length - 1 ? '✓ Place Order' : 'Next Step'}
-          {currentStep < steps.length - 1 && <ChevronRight className="w-5 h-5" />}
+          {loading ? 'Processing...' : (currentStep === steps.length - 1 ? '✓ Place Order' : 'Next Step')}
+          {!loading && currentStep < steps.length - 1 && <ChevronRight className="w-5 h-5" />}
         </Button>
       </div>
     </div>
@@ -157,7 +322,7 @@ const ReviewCart = ({ items, subtotal, tax, shipping, total }) => (
           <h3 className="font-bold text-txt-dark mb-4 pb-3 border-b border-surface-border">Price Summary</h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-txt-secondary">Subtotal</span><span className="font-bold">₹{subtotal.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-txt-secondary">GST (12%)</span><span className="font-bold">₹{tax.toFixed(0)}</span></div>
+            <div className="flex justify-between"><span className="text-txt-secondary">GST ({gstRate}%)</span><span className="font-bold">₹{tax.toFixed(0)}</span></div>
             <div className="flex justify-between"><span className="text-txt-secondary">Shipping</span><span className={`font-bold ${shipping === 0 ? 'text-medical-success' : ''}`}>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span></div>
             <div className="flex justify-between pt-3 border-t border-surface-border text-lg">
               <span className="font-bold text-txt-dark">Total</span>
@@ -170,34 +335,44 @@ const ReviewCart = ({ items, subtotal, tax, shipping, total }) => (
   </div>
 );
 
-const AddressForm = () => {
+const AddressForm = ({ setAddress, address, phone, setPhone }) => {
   const [selected, setSelected] = useState(0);
+  const addresses = [
+      "123 Medical Street, Opp City Hospital, Mumbai, MH 400001",
+      "Unit 45, Pharma SEZ, Thane West, Mumbai, MH 400601"
+  ];
+
+  const handleSelect = (idx) => {
+      setSelected(idx);
+      setAddress(addresses[idx]);
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold flex items-center gap-2"><MapPin className="text-brand-primary" /> Delivery Address</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
-          onClick={() => setSelected(0)}
+          onClick={() => handleSelect(0)}
           className={`p-5 rounded-xl flex items-start gap-4 text-left transition-all ${selected === 0 ? 'border-2 border-brand-primary bg-brand-primary/5 shadow-md' : 'border-2 border-surface-border hover:border-brand-primary/40'
             }`}
         >
           <Home className={`shrink-0 mt-0.5 ${selected === 0 ? 'text-brand-primary' : 'text-txt-placeholder'}`} />
           <div>
             <p className="font-bold text-txt-dark">Clinic Primary</p>
-            <p className="text-sm text-txt-secondary leading-relaxed mt-1">123 Medical Street, Opp City Hospital, Mumbai, MH 400001</p>
+            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{addresses[0]}</p>
             {selected === 0 && <Badge className="mt-2 bg-brand-primary/10 text-brand-primary border-none text-xs">Selected</Badge>}
           </div>
         </button>
         <button
-          onClick={() => setSelected(1)}
+          onClick={() => handleSelect(1)}
           className={`p-5 rounded-xl flex items-start gap-4 text-left transition-all ${selected === 1 ? 'border-2 border-brand-primary bg-brand-primary/5 shadow-md' : 'border-2 border-surface-border hover:border-brand-primary/40'
             }`}
         >
           <Package className={`shrink-0 mt-0.5 ${selected === 1 ? 'text-brand-primary' : 'text-txt-placeholder'}`} />
           <div>
             <p className="font-bold text-txt-dark">Warehouse B</p>
-            <p className="text-sm text-txt-secondary leading-relaxed mt-1">Unit 45, Pharma SEZ, Thane West, Mumbai, MH 400601</p>
+            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{addresses[1]}</p>
             {selected === 1 && <Badge className="mt-2 bg-brand-primary/10 text-brand-primary border-none text-xs">Selected</Badge>}
           </div>
         </button>
@@ -208,7 +383,7 @@ const AddressForm = () => {
         <h3 className="font-bold text-txt-dark mb-4">Or Add New Address</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input label="Full Name" placeholder="Dr. Ashish Maurya" />
-          <Input label="Phone Number" placeholder="+91 98765 43210" />
+          <Input label="Phone Number" placeholder="+91 98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <div className="sm:col-span-2">
             <Input label="Street Address" placeholder="123 Medical Street, Building Name" />
           </div>
@@ -220,26 +395,43 @@ const AddressForm = () => {
   );
 };
 
-const PrescriptionUpload = () => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-bold flex items-center gap-2"><UploadCloud className="text-brand-primary" /> Upload Prescriptions</h2>
-    <p className="text-sm text-txt-secondary max-w-lg">Some items in your cart may require a valid prescription from a registered medical practitioner.</p>
+const PrescriptionUpload = ({ file, setFile }) => {
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
 
-    <div className="border-2 border-dashed border-surface-border rounded-2xl p-8 sm:p-12 hover:border-brand-primary transition-colors cursor-pointer text-center bg-surface-bg/30">
-      <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto text-brand-primary mb-4">
-        <UploadCloud className="w-8 h-8" />
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold flex items-center gap-2"><UploadCloud className="text-brand-primary" /> Upload Prescriptions</h2>
+      <p className="text-sm text-txt-secondary max-w-lg">Some items in your cart may require a valid prescription from a registered medical practitioner.</p>
+
+      <div 
+        className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-colors cursor-pointer text-center relative ${file ? 'border-medical-success bg-green-50' : 'border-surface-border hover:border-brand-primary bg-surface-bg/30'}`}
+      >
+        <input 
+          type="file" 
+          onChange={handleFileChange} 
+          accept=".jpg,.jpeg,.png,.pdf"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${file ? 'bg-medical-success/10 text-medical-success' : 'bg-brand-primary/10 text-brand-primary'}`}>
+          {file ? <CheckCircle2 className="w-8 h-8" /> : <UploadCloud className="w-8 h-8" />}
+        </div>
+        <p className="text-sm font-bold text-txt-dark mb-1">{file ? file.name : 'Drag and drop files here'}</p>
+        <p className="text-sm text-txt-secondary">{file ? 'Click to change file' : <span>or <span className="text-brand-primary font-bold cursor-pointer hover:underline">browse files</span></span>}</p>
+        <p className="text-[10px] uppercase font-black text-txt-placeholder mt-4 tracking-wider">JPG, PNG, PDF — Max 5MB</p>
       </div>
-      <p className="text-sm font-bold text-txt-dark mb-1">Drag and drop files here</p>
-      <p className="text-sm text-txt-secondary">or <span className="text-brand-primary font-bold cursor-pointer hover:underline">browse files</span></p>
-      <p className="text-[10px] uppercase font-black text-txt-placeholder mt-4 tracking-wider">JPG, PNG, PDF — Max 5MB</p>
+
+      <Button variant="outline" className="w-full sm:w-auto" onClick={() => setFile(null)}>
+        {file ? 'Remove File' : 'Skip for Now'}
+      </Button>
     </div>
+  );
+};
 
-    <Button variant="outline" className="w-full sm:w-auto">Skip for Now</Button>
-  </div>
-);
-
-const PaymentMethod = () => {
-  const [selected, setSelected] = useState(0);
+const PaymentMethod = ({ setPaymentMethod, paymentMethod }) => {
   const methods = [
     { name: 'UPI / GPay / PhonePe', icon: <Smartphone className="w-6 h-6 text-brand-primary" /> },
     { name: 'Credit / Debit Card', icon: <CreditCard className="w-6 h-6 text-brand-secondary" /> },
@@ -254,8 +446,8 @@ const PaymentMethod = () => {
         {methods.map((method, idx) => (
           <button
             key={idx}
-            onClick={() => setSelected(idx)}
-            className={`flex items-center gap-4 p-5 rounded-xl transition-all text-left ${selected === idx
+            onClick={() => setPaymentMethod(method.name)}
+            className={`flex items-center gap-4 p-5 rounded-xl transition-all text-left ${paymentMethod === method.name
               ? 'border-2 border-brand-primary bg-brand-primary/5 shadow-md'
               : 'border-2 border-surface-border hover:border-brand-primary/40'
               }`}
@@ -265,7 +457,7 @@ const PaymentMethod = () => {
             </div>
             <div>
               <span className="font-bold text-txt-dark block">{method.name}</span>
-              {selected === idx && <span className="text-xs text-brand-primary font-bold">Selected</span>}
+              {paymentMethod === method.name && <span className="text-xs text-brand-primary font-bold">Selected</span>}
             </div>
           </button>
         ))}
@@ -274,7 +466,7 @@ const PaymentMethod = () => {
   );
 };
 
-const FinalReview = ({ total, items }) => (
+const FinalReview = ({ total, items, address, paymentMethod }) => (
   <div className="space-y-6">
     <h2 className="text-xl font-bold flex items-center gap-2"><CheckCircle2 className="text-medical-success" /> Order Confirmation</h2>
 
@@ -294,7 +486,7 @@ const FinalReview = ({ total, items }) => (
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between gap-1 text-sm">
           <span className="font-bold text-txt-secondary">Delivery To:</span>
-          <span className="font-bold text-txt-dark">Clinic Primary, Mumbai</span>
+          <span className="font-bold text-txt-dark max-w-xs text-right">{address}</span>
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-1 text-sm">
           <span className="font-bold text-txt-secondary">Estimated Delivery:</span>
@@ -302,7 +494,7 @@ const FinalReview = ({ total, items }) => (
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-1 text-sm">
           <span className="font-bold text-txt-secondary">Payment Method:</span>
-          <span className="font-bold text-txt-dark">UPI / GPay / PhonePe</span>
+          <span className="font-bold text-txt-dark">{paymentMethod}</span>
         </div>
         <div className="flex flex-col sm:flex-row justify-between gap-1 text-sm">
           <span className="font-bold text-txt-secondary">Items:</span>

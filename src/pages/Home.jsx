@@ -1,22 +1,66 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Hero, CategoryStrip } from '../components/layout/Hero';
-import { medicines } from '../data/medicines';
+import { supabase, isMockMode } from '../lib/supabase';
+import { mockProducts } from '../lib/mockData';
 import ProductCard from '../components/features/ProductCard';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { ArrowRight, Activity, TrendingUp, Clock, ShieldCheck, Truck, Percent, Stethoscope } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import StockAlertsMockup from '../components/features/StockAlertsMockup';
+import StockAlerts from '../components/features/StockAlerts';
 
 const Home = () => {
-  // Filter for featured and best deals
-  const featuredMedicines = useMemo(() =>
-    medicines.filter(m => m.featured).slice(0, 8),
-    []);
+  const [featuredMedicines, setFeaturedMedicines] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const deals = useMemo(() =>
-    medicines.filter(m => m.packSizes[0].discount > 25).slice(0, 4),
-    []);
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        let data;
+        
+        if (isMockMode) {
+          console.log('Using mock data for Home');
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 800));
+          data = mockProducts;
+        } else {
+          const { data: supabaseData, error } = await supabase
+            .from('products')
+            .select('*')
+            .limit(20);
+          
+          if (error) throw error;
+          data = supabaseData;
+        }
+
+        const mappedProducts = data.map(p => ({
+            id: p.id,
+            name: p.name,
+            genericName: p.generic_name,
+            brand: p.brand,
+            manufacturer: p.manufacturer?.name || 'Unknown',
+            category: p.category,
+            packSizes: p.pack_sizes || [], // Pass raw pack_sizes for ProductCard
+            stock: p.stock,
+            requiresPrescription: p.prescription_required,
+            image: p.images?.[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400",
+            featured: p.featured,
+            description: p.description
+        }));
+
+        setFeaturedMedicines(mappedProducts.filter(m => m.featured).slice(0, 8));
+        setDeals(mappedProducts.filter(m => (m.packSizes?.[0]?.discount || 0) > 5).slice(0, 4));
+      } catch (error) {
+        console.error('Error fetching home data:', error);
+        // Do not show toast for connection errors on Home to keep it clean, but maybe show a banner in UI
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
 
   return (
     <div className="flex flex-col gap-0 w-full overflow-hidden">
@@ -26,6 +70,11 @@ const Home = () => {
       {/* Category Strip - Elevated */}
       <div className="-mt-8 relative z-10 px-4 mb-12">
         <CategoryStrip />
+      </div>
+
+      {/* Stock Alerts - Predictive AI */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+         <StockAlerts />
       </div>
 
       {/* Trust Benefits Bar */}
@@ -133,12 +182,12 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Decorative UI Mockup Area */}
+            {/* Decorative UI Area */}
             <div className="hidden lg:block relative z-10 lg:w-2/5">
               <div className="relative transform rotate-2 hover:rotate-0 transition-all duration-700 ease-out">
-                {/* Visual Glow behind mockup */}
+                {/* Visual Glow behind UI */}
                 <div className="absolute -inset-10 bg-brand-primary/20 rounded-full blur-[100px] -z-10" />
-                <StockAlertsMockup />
+                <StockAlerts />
               </div>
             </div>
           </div>

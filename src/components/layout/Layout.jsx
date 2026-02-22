@@ -186,17 +186,6 @@ const Layout = () => {
           </div>
         </div>
       </footer>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          className: 'bg-white text-txt-primary shadow-lg rounded-lg border border-surface-border',
-          duration: 4000,
-          style: {
-            background: '#ffffff',
-            color: '#0F172A',
-          },
-        }}
-      />
     </div>
   );
 };

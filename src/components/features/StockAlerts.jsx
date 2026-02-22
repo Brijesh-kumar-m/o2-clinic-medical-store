@@ -1,19 +1,50 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, AlertTriangle, Package, TrendingDown } from 'lucide-react';
-import { medicines } from '../../data/medicines';
+import { supabase, isMockMode } from '../../lib/supabase';
 
-const StockAlertsMockup = () => {
-  // Find low stock items for the mockup
-  const lowStockItems = useMemo(() => {
-    return medicines
-      .filter(m => m.stock < 300)
-      .slice(0, 3)
-      .map(m => ({
-        ...m,
-        percentage: Math.floor((m.stock / 1000) * 100)
-      }));
+const StockAlerts = () => {
+  const [lowStockItems, setLowStockItems] = useState([]);
+
+  useEffect(() => {
+    const fetchLowStockItems = async () => {
+      try {
+        let data = [];
+        
+        if (isMockMode) {
+          // Mock data fallback if mockProducts is not defined in scope
+          const mockItems = [
+             { id: 1, name: 'Paracetamol 500mg', stock: 120 },
+             { id: 2, name: 'Amoxycillin 500mg', stock: 50 },
+             { id: 3, name: 'Cetirizine 10mg', stock: 200 }
+          ];
+          data = mockItems;
+        } else {
+          const { data: supabaseData, error } = await supabase
+            .from('products')
+            .select('*')
+            .lt('stock', 300)
+            .limit(3);
+
+          if (error) throw error;
+          data = supabaseData || [];
+        }
+
+        const formattedItems = data.map(m => ({
+          ...m,
+          percentage: Math.min(Math.floor((m.stock / 1000) * 100), 100)
+        }));
+        
+        setLowStockItems(formattedItems);
+      } catch (error) {
+        console.error('Error fetching stock alerts:', error);
+      }
+    };
+
+    fetchLowStockItems();
   }, []);
+
+  if (lowStockItems.length === 0) return null;
 
   return (
     <div className="relative w-full max-w-md mx-auto md:mx-0">
@@ -87,4 +118,4 @@ const StockAlertsMockup = () => {
   );
 };
 
-export default StockAlertsMockup;
+export default StockAlerts;

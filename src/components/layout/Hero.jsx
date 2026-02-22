@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ArrowRight, ShieldCheck, Truck, Zap, Activity, Search } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 const Hero = () => {
+  const [stats, setStats] = useState({
+    products: '50k+',
+    doctors: '12k+',
+    delivery: '24hr'
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { count: productCount } = await supabase
+          .from('products')
+          .select('*', { count: 'estimated', head: true });
+
+        const { count: doctorCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'estimated', head: true });
+
+        setStats({
+          products: productCount ? `${(productCount / 1000).toFixed(1)}k+` : '100+',
+          doctors: doctorCount ? `${(doctorCount / 1000).toFixed(1)}k+` : '50+',
+          delivery: '24hr'
+        });
+      } catch (error) {
+        console.error('Error fetching hero stats:', error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <section className="relative w-full overflow-hidden bg-surface-bg pt-3 pb-16 lg:pt-12 lg:pb-32">
@@ -40,17 +69,17 @@ const Hero = () => {
 
             <div className="flex items-center gap-8 border-t border-surface-border pt-8 w-full">
               <div>
-                <p className="text-3xl font-bold text-txt-dark mb-1">50k+</p>
+                <p className="text-3xl font-bold text-txt-dark mb-1">{stats.products}</p>
                 <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">SKUs Available</p>
               </div>
               <div className="w-px h-10 bg-surface-border"></div>
               <div>
-                <p className="text-3xl font-bold text-txt-dark mb-1">12k+</p>
+                <p className="text-3xl font-bold text-txt-dark mb-1">{stats.doctors}</p>
                 <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">Verified Doctors</p>
               </div>
               <div className="w-px h-10 bg-surface-border"></div>
               <div>
-                <p className="text-3xl font-bold text-txt-dark mb-1">24hr</p>
+                <p className="text-3xl font-bold text-txt-dark mb-1">{stats.delivery}</p>
                 <p className="text-xs text-txt-secondary font-medium uppercase tracking-wider">Avg. Delivery</p>
               </div>
             </div>
@@ -100,8 +129,7 @@ const Hero = () => {
 };
 
 const CategoryStrip = () => {
-  // Medical categories with clinical styling
-  const categories = [
+  const [categories, setCategories] = useState([
     { name: "Antibiotics", icon: "💊", count: "1.2k+ Prods" },
     { name: "Cardiology", icon: "🫀", count: "800+ Prods" },
     { name: "Diabetology", icon: "🩸", count: "500+ Prods" },
@@ -110,7 +138,46 @@ const CategoryStrip = () => {
     { name: "Neurology", icon: "🧠", count: "200+ Prods" },
     { name: "Dermatology", icon: "🧴", count: "600+ Prods" },
     { name: "Supplements", icon: "⚡", count: "1k+ Prods" }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchCategoryStats = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_category_stats');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Map icons based on category name (simple heuristic)
+          const getIcon = (name) => {
+            const lower = name.toLowerCase();
+            if (lower.includes('antibiotic')) return "💊";
+            if (lower.includes('cardio') || lower.includes('heart')) return "🫀";
+            if (lower.includes('diabet') || lower.includes('sugar')) return "🩸";
+            if (lower.includes('respir') || lower.includes('lung')) return "🫁";
+            if (lower.includes('gastro') || lower.includes('stomach')) return "🧪";
+            if (lower.includes('neuro') || lower.includes('brain')) return "🧠";
+            if (lower.includes('derm') || lower.includes('skin')) return "🧴";
+            if (lower.includes('supplement') || lower.includes('vitamin')) return "⚡";
+            return "📦";
+          };
+
+          const mappedCategories = data.map(item => ({
+            name: item.category,
+            icon: getIcon(item.category),
+            count: `${item.count} Prods`
+          }));
+          
+          setCategories(mappedCategories);
+        }
+      } catch (err) {
+        console.error('Failed to fetch category stats:', err);
+        // Fallback to default categories if RPC fails or returns empty
+      }
+    };
+
+    fetchCategoryStats();
+  }, []);
 
   return (
     <div className="w-full max-w-7xl mx-auto">

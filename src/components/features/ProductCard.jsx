@@ -7,14 +7,18 @@ import { useCartStore } from '../../store/useCartStore';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
   const addToCart = useCartStore((state) => state.addToCart);
-  const mainPack = product.packSizes[0];
-  const discount = mainPack.discount;
+  const mainPack = product.packSizes?.[0] || { price: 0, mrp: 0, discount: 0, size: 'Standard' };
+  const discount = mainPack.discount || 0;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!product.packSizes?.length) {
+      toast.error('Product currently unavailable');
+      return;
+    }
     addToCart(product, 1, mainPack.size);
     toast.success(`${product.name} added to cart!`, {
       style: {
@@ -47,8 +51,15 @@ const ProductCard = ({ product }) => {
         )}
       </div>
 
-      <button className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-white text-txt-secondary hover:text-medical-error hover:bg-red-50 transition-all shadow-md opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0 duration-300">
-        <Heart className="w-4 h-4" />
+      <button 
+        onClick={onToggleWishlist}
+        className={`absolute top-3 right-3 z-20 p-2.5 rounded-full bg-white hover:text-medical-error hover:bg-red-50 transition-all shadow-md duration-300 ${
+          isWishlisted 
+            ? 'text-medical-error opacity-100 translate-y-0' 
+            : 'text-txt-secondary opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0'
+        }`}
+      >
+        <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-medical-error' : ''}`} />
       </button>
 
       {/* Link Wrapper for Content */}

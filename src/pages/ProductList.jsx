@@ -1,46 +1,222 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { medicines } from '../data/medicines';
+import { supabase, isMockMode } from '../lib/supabase';
+import { mockProducts } from '../lib/mockData';
 import ProductCard from '../components/features/ProductCard';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Filter, Search, X, LayoutGrid, List, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { useAuthStore } from '../store/useAuthStore';
+
+import { useDebounce } from '../hooks/useDebounce';
 
 const ProductList = () => {
   const [searchParams] = useSearchParams();
   const [viewType, setViewType] = useState('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
+  const { user } = useAuthStore();
+  const [wishlistIds, setWishlistIds] = useState(new Set());
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('search') || '');
+
+  useEffect(() => {
+    const query = searchParams.get('search');
+    if (query !== null) {
+      setSearchQuery(query);
+    }
+  }, [searchParams]);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedManufacturer, setSelectedManufacturer] = useState('All');
   const [sortBy, setSortBy] = useState('popular');
 
-  const categories = useMemo(() => ['All', ...new Set(medicines.map(m => m.category))], []);
-  const manufacturers = useMemo(() => ['All', ...new Set(medicines.map(m => m.manufacturer.name))], []);
+  // Fetch wishlist IDs
+  useEffect(() => {
+    if (user) {
+      const fetchWishlistIds = async () => {
+        const { data, error } = await supabase
+          .from('wishlist')
+          .select('product_id')
+          .eq('user_id', user.id);
+        
+        if (!error && data) {
+          setWishlistIds(new Set(data.map(item => item.product_id)));
+        }
+      };
+      fetchWishlistIds();
+    } else {
+      setWishlistIds(new Set());
+    }
+  }, [user]);
+
+  const toggleWishlist = async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Please login to manage wishlist');
+      return;
+    }
+
+    if (wishlistIds.has(productId)) {
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+      
+      if (!error) {
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+        toast.success('Removed from wishlist');
+      } else {
+        toast.error('Failed to remove from wishlist');
+      }
+    } else {
+      const { error } = await supabase
+        .from('wishlist')
+        .insert([{ user_id: user.id, product_id: productId }]);
+      
+      if (!error) {
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.add(productId);
+          return newSet;
+        });
+        toast.success('Added to wishlist');
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
+    }
+  };
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        let data, error;
+
+        if (isMockMode) {
+          console.log('Using mock data for ProductList');
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 800));
+          
+          if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+            const q = debouncedSearchQuery.toLowerCase();
+            data = mockProducts.filter(p => 
+              p.name.toLowerCase().includes(q) || 
+              p.generic_name.toLowerCase().includes(q) ||
+              p.brand.toLowerCase().includes(q)
+            );
+          } else {
+            data = mockProducts;
+          }
+        } else {
+          if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+            const result = await supabase.rpc('search_medicines', { search_query: debouncedSearchQuery });
+            data = result.data;
+            error = result.error;
+          } else {
+            const result = await supabase.from('products').select('*');
+            data = result.data;
+            error = result.error;
+          }
+        }
+
+        if (error) throw error;
+
+        // Map snake_case to camelCase for frontend components
+        const mappedProducts = (data || []).map(p => ({
+            id: p.id,
+            name: p.name,
+            genericName: p.generic_name,
+            brand: p.brand,
+            manufacturer: p.manufacturer, // Assuming JSONB stores { name, logo }
+            category: p.category,
+            subCategory: p.sub_category,
+            composition: p.composition,
+            dosageForm: p.dosage_form,
+            packSizes: p.pack_sizes,
+            prescriptionRequired: p.prescription_required,
+            schedule: p.schedule,
+            stock: p.stock,
+            expiryDate: p.expiry_date,
+            rating: p.rating,
+            reviewCount: p.review_count,
+            featured: p.featured,
+            description: p.description,
+            images: p.images,
+            indications: p.indications,
+            sideEffects: p.side_effects,
+            storage: p.storage
+        }));
+
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        // Only show toast if it's not a connection error to avoid spamming on load
+        if (error.message !== 'Failed to fetch') {
+          toast.error('Failed to load products. Please try again later.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [debouncedSearchQuery]);
+
+  const categories = useMemo(() => ['All', ...new Set(products.map(m => m.category))], [products]);
+  const manufacturers = useMemo(() => ['All', ...new Set(products.map(m => m.manufacturer?.name).filter(Boolean))], [products]);
 
   const filteredMedicines = useMemo(() => {
-    return medicines
+    return products
       .filter(m => {
-        const matchesSearch = searchQuery === '' ||
-          m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          m.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          m.brand.toLowerCase().includes(searchQuery.toLowerCase());
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = true; // Search handled by RPC or fetch all
+        // (If fetching all, we might want client-side search for small strings < 3 chars)
+        // But for simplicity, let's keep client-side filtering as fallback if RPC not used
+        // Actually, if we use RPC, 'products' is already filtered by search.
+        // If we fetched all, 'products' is all.
+        // So we should only apply client-side search if we fetched all AND query is short?
+        // No, if query is short (<3), we fetch ALL. Then we should filter client-side?
+        // Yes.
+
+        let matchesClientSearch = true;
+        if (!debouncedSearchQuery || debouncedSearchQuery.length <= 2) {
+             matchesClientSearch = searchQuery === '' ||
+              m.name.toLowerCase().includes(q) ||
+              (m.genericName && m.genericName.toLowerCase().includes(q)) || 
+              (m.brand && m.brand.toLowerCase().includes(q)) ||
+              (m.composition && m.composition.toLowerCase().includes(q));
+        }
 
         const matchesCategory = selectedCategory === 'All' || m.category === selectedCategory;
-        const matchesMfr = selectedManufacturer === 'All' || m.manufacturer.name === selectedManufacturer;
+        const matchesMfr = selectedManufacturer === 'All' || m.manufacturer?.name === selectedManufacturer;
 
-        return matchesSearch && matchesCategory && matchesMfr;
+        return matchesClientSearch && matchesCategory && matchesMfr;
       })
       .sort((a, b) => {
-        if (sortBy === 'price-low') return a.packSizes[0].price - b.packSizes[0].price;
-        if (sortBy === 'price-high') return b.packSizes[0].price - a.packSizes[0].price;
-        if (sortBy === 'rating') return b.rating - a.rating;
+        const priceA = a.packSizes?.[0]?.price || 0;
+        const priceB = b.packSizes?.[0]?.price || 0;
+
+        if (sortBy === 'price-low') return priceA - priceB;
+        if (sortBy === 'price-high') return priceB - priceA;
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
         return 0; // popular/default
       });
-  }, [searchQuery, selectedCategory, selectedManufacturer, sortBy]);
+  }, [searchQuery, selectedCategory, selectedManufacturer, sortBy, products]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
@@ -165,10 +341,19 @@ const ProductList = () => {
 
         {/* Product Grid */}
         <div className="flex-1 min-w-0">
-          {filteredMedicines.length > 0 ? (
+          {loading ? (
+             <div className="flex justify-center items-center py-24">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+             </div>
+          ) : filteredMedicines.length > 0 ? (
             <div className={`grid gap-6 ${viewType === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {filteredMedicines.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  isWishlisted={wishlistIds.has(product.id)}
+                  onToggleWishlist={(e) => toggleWishlist(e, product.id)}
+                />
               ))}
             </div>
           ) : (

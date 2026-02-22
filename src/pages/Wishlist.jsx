@@ -1,59 +1,140 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, Star, ExternalLink } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-// useCartStore is unused here
 import { toast } from 'react-hot-toast';
-
-// Demo wishlist data
-const wishlistItems = [
-  {
-    id: 'med_001',
-    name: 'Dolo 650mg',
-    genericName: 'Paracetamol',
-    manufacturer: 'Micro Labs',
-    price: 35,
-    mrp: 42,
-    discount: 17,
-    rating: 4.5,
-    inStock: true,
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop',
-  },
-  {
-    id: 'med_003',
-    name: 'Azithromycin 500mg',
-    genericName: 'Azithromycin',
-    manufacturer: 'Cipla',
-    price: 89,
-    mrp: 120,
-    discount: 26,
-    rating: 4.3,
-    inStock: true,
-    image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=300&auto=format&fit=crop',
-  },
-  {
-    id: 'med_005',
-    name: 'Pantoprazole 40mg',
-    genericName: 'Pantoprazole',
-    manufacturer: 'Sun Pharma',
-    price: 65,
-    mrp: 85,
-    discount: 24,
-    rating: 4.6,
-    inStock: false,
-    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=300&auto=format&fit=crop',
-  },
-];
+import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/useAuthStore';
+import { useCartStore } from '../store/useCartStore';
 
 const Wishlist = () => {
-  const [items, setItems] = React.useState(wishlistItems);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  const addToCart = useCartStore((state) => state.addToCart);
 
-  const removeItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
-    toast.success('Removed from wishlist');
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    } else {
+      setItems([]);
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchWishlist = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select(`
+          id,
+          product:products (
+            id,
+            name,
+            generic_name,
+            manufacturer,
+            pack_sizes,
+            rating,
+            stock,
+            images,
+            description
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const mappedItems = data.map(item => {
+        const product = item.product;
+        const mainPack = product.pack_sizes && product.pack_sizes.length > 0 ? product.pack_sizes[0] : { price: 0, mrp: 0, discount: 0 };
+        return {
+          id: product.id,
+          wishlistId: item.id,
+          name: product.name,
+          genericName: product.generic_name,
+          manufacturer: product.manufacturer?.name || 'Unknown',
+          price: mainPack.price,
+          mrp: mainPack.mrp,
+          discount: mainPack.discount,
+          rating: product.rating || 0,
+          inStock: product.stock > 0,
+          image: product.images?.[0] || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop',
+          // Additional fields for cart
+          brand: product.brand,
+          category: product.category,
+          packSizes: product.pack_sizes || [],
+          rawManufacturer: product.manufacturer
+        };
+      });
+
+      setItems(mappedItems);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+      toast.error('Failed to load wishlist');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleAddToCart = (item) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      generic_name: item.genericName,
+      brand: item.brand,
+      manufacturer: item.rawManufacturer || { name: item.manufacturer },
+      category: item.category,
+      pack_sizes: item.packSizes,
+      images: [item.image]
+    }, 1, item.packSizes?.[0]?.size || "Standard");
+    toast.success(`Added ${item.name} to cart`);
+  };
+
+  const removeItem = async (productId) => {
+    try {
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+
+      if (error) throw error;
+
+      setItems(items.filter(item => item.id !== productId));
+      toast.success('Removed from wishlist');
+    } catch (error) {
+      console.error('Error removing item:', error);
+      toast.error('Failed to remove item');
+    }
+  };
+
+  const clearAll = async () => {
+    try {
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setItems([]);
+      toast.success('Wishlist cleared');
+    } catch (error) {
+      console.error('Error clearing wishlist:', error);
+      toast.error('Failed to clear wishlist');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-1 pb-8 lg:pt-3 lg:pb-12">
@@ -66,7 +147,7 @@ const Wishlist = () => {
           <p className="text-txt-secondary mt-1">{items.length} saved medicines</p>
         </div>
         {items.length > 0 && (
-          <Button variant="outline" className="text-sm" onClick={() => { setItems([]); toast.success('Wishlist cleared'); }}>
+          <Button variant="outline" className="text-sm" onClick={clearAll}>
             Clear All
           </Button>
         )}
@@ -139,6 +220,7 @@ const Wishlist = () => {
                   <Button
                     className="flex-1 h-10 rounded-xl text-sm font-bold gap-2"
                     disabled={!item.inStock}
+                    onClick={() => handleAddToCart(item)}
                   >
                     <ShoppingCart className="w-4 h-4" /> {item.inStock ? 'Add to Cart' : 'Unavailable'}
                   </Button>

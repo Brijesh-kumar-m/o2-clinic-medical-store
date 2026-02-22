@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -8,38 +8,99 @@ import {
   Settings, Bell, LogOut, ChevronRight, User,
   TrendingUp, Clock, AlertCircle, ShieldCheck
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import ProfileEditModal from '../components/features/ProfileEditModal';
 
 const Dashboard = () => {
-  const { user, logout } = useAuthStore();
+  const { user, profile, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [stats, setStats] = useState({
+    purchasedToday: 0,
+    activeOrders: 0,
+    totalSaved: 0,
+    creditLimit: '1.5L'
+  });
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: 'Purchased Today', value: '₹12,450', icon: TrendingUp, color: 'text-medical-success' },
-    { label: 'Active Orders', value: '03', icon: Clock, color: 'text-brand-primary' },
-    { label: 'Total Saved', value: '₹4,120', icon: ShoppingBag, color: 'text-brand-accent' },
-    { label: 'Credit Limit', value: '₹1.5L', icon: CreditCard, color: 'text-medical-info' },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
-  const recentOrders = [
-    { id: 'ORD-5421', date: '15 Feb 2026', items: 12, total: '₹15,200', status: 'Delivered' },
-    { id: 'ORD-5390', date: '10 Feb 2026', items: 5, total: '₹8,450', status: 'Shipped' },
-    { id: 'ORD-5311', date: '02 Feb 2026', items: 23, total: '₹42,100', status: 'Delivered' },
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Fetch Orders
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (id)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      // Calculate stats
+      const today = new Date().toDateString();
+      const todaysOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
+      const purchasedToday = todaysOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+      const activeOrdersCount = orders.filter(o => ['pending', 'processing', 'shipped'].includes(o.status)).length;
+      
+      // Estimate savings (assuming ~20% discount on MRP)
+      const estimatedSavings = orders.reduce((sum, o) => sum + (Number(o.total_amount) * 0.25), 0);
+
+      setStats(prev => ({
+        ...prev,
+        purchasedToday,
+        activeOrders: activeOrdersCount,
+        totalSaved: Math.round(estimatedSavings)
+      }));
+
+      // Map recent orders
+      const mappedOrders = orders.map(order => ({
+        id: order.id,
+        date: new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        items: order.order_items?.length || 0,
+        total: `₹${order.total_amount}`,
+        status: order.status.charAt(0).toUpperCase() + order.status.slice(1)
+      }));
+
+      setRecentOrders(mappedOrders);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const statCards = [
+    { label: 'Purchased Today', value: `₹${stats.purchasedToday.toLocaleString()}`, icon: TrendingUp, color: 'text-medical-success' },
+    { label: 'Active Orders', value: stats.activeOrders.toString().padStart(2, '0'), icon: Clock, color: 'text-brand-primary' },
+    { label: 'Total Saved', value: `₹${stats.totalSaved.toLocaleString()}`, icon: ShoppingBag, color: 'text-brand-accent' },
+    { label: 'Credit Limit', value: stats.creditLimit, icon: CreditCard, color: 'text-medical-info' },
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl pt-sm pb-xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-xl mb-2xl">
         <div>
-          <h1 className="text-3xl font-black text-txt-dark mb-1">Welcome, {user?.profile?.title || 'Dr.'} {user?.profile?.lastName}</h1>
+          <h1 className="text-3xl font-black text-txt-dark mb-1">Welcome, Dr. {profile?.last_name || 'User'}</h1>
           <p className="text-txt-secondary font-medium flex items-center gap-2">
             <Badge variant="success" className="h-2 w-2 p-0 animate-pulse"></Badge>
-            Practice ID: {user?.id} • {user?.practice?.name}
+            Practice ID: {user?.id?.slice(0, 8)} • {profile?.practice_name || 'Medical Store'}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl border-2">
-            <Settings className="w-5 h-5 mr-2" /> practice Settings
+          <Button variant="outline" className="rounded-xl border-2" onClick={() => setIsEditProfileOpen(true)}>
+            <Settings className="w-5 h-5 mr-2" /> Practice Settings
           </Button>
           <Button
             variant="ghost"
@@ -52,7 +113,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-xl mb-4xl">
-        {stats.map((stat, idx) => {
+        {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <Card key={idx} className="border-none shadow-xl bg-white overflow-hidden group">
@@ -137,7 +198,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase text-txt-placeholder">Specialist</p>
-                  <p className="font-bold text-txt-dark">{user?.profile?.specialization}</p>
+                  <p className="font-bold text-txt-dark">{profile?.specialization || 'General Practitioner'}</p>
                 </div>
               </div>
               <div className="flex gap-4 items-center">
@@ -146,7 +207,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase text-txt-placeholder">Primary Location</p>
-                  <p className="font-bold text-txt-dark truncate max-w-[200px]">{user?.practice?.address}</p>
+                  <p className="font-bold text-txt-dark truncate max-w-[200px]">{profile?.address || 'No address set'}</p>
                 </div>
               </div>
               <div className="flex gap-4 items-center">
@@ -155,10 +216,10 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-xs font-black uppercase text-txt-placeholder">License No.</p>
-                  <p className="font-bold text-txt-dark">{user?.profile?.licenseNumber}</p>
+                  <p className="font-bold text-txt-dark">{profile?.license_number || 'Pending'}</p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full mt-4 border-2">Edit Practice Profile</Button>
+              <Button variant="outline" className="w-full mt-4 border-2" onClick={() => setIsEditProfileOpen(true)}>Edit Practice Profile</Button>
             </CardContent>
           </Card>
 
@@ -169,6 +230,14 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Profile Edit Modal */}
+      {isEditProfileOpen && (
+        <ProfileEditModal 
+          isOpen={isEditProfileOpen} 
+          onClose={() => setIsEditProfileOpen(false)} 
+        />
+      )}
     </div>
   );
 };

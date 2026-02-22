@@ -9,13 +9,19 @@ import {
   ShieldCheck, AlertCircle, Trash, Info
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, getSubtotal, clearCart } = useCartStore();
+  const { gstRate, shippingCharge, freeShippingThreshold, fetchSettings } = useSettingsStore();
+
+  React.useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const subtotal = getSubtotal();
-  const tax = subtotal * 0.12; // 12% GST
-  const shipping = subtotal > 5000 ? 0 : 150;
+  const tax = subtotal * (gstRate / 100);
+  const shipping = subtotal > freeShippingThreshold ? 0 : shippingCharge;
   const total = subtotal + tax + shipping;
 
   if (items.length === 0) {
@@ -129,7 +135,7 @@ const Cart = () => {
                   <span className="text-txt-dark font-bold">₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-txt-secondary font-medium">
-                  <span>Wholesale GST (12%)</span>
+                  <span>Wholesale GST ({gstRate}%)</span>
                   <span className="text-txt-dark font-bold">₹{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-txt-secondary font-medium">
@@ -140,7 +146,7 @@ const Cart = () => {
                 </div>
                 {shipping > 0 && (
                   <p className="text-[10px] font-bold text-brand-primary bg-brand-primary/5 p-2 rounded-lg flex items-center gap-2 tracking-tight">
-                    <Info className="w-3 h-3" /> Add ₹{(5000 - subtotal).toFixed(2)} more for FREE shipping
+                    <Info className="w-3 h-3" /> Add ₹{(freeShippingThreshold - subtotal).toFixed(2)} more for FREE shipping
                   </p>
                 )}
               </div>

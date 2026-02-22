@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { medicines } from '../data/medicines';
 import { useCartStore } from '../store/useCartStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
@@ -14,20 +14,173 @@ import {
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import ProductCard from '../components/features/ProductCard';
+import { supabase } from '../lib/supabase';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = useMemo(() => medicines.find(m => m.id === id), [id]);
   const addToCart = useCartStore((state) => state.addToCart);
+  const { user } = useAuthStore();
 
-  const [selectedPack, setSelectedPack] = useState(product?.packSizes[0]);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPack, setSelectedPack] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
 
-  const relatedProducts = useMemo(() =>
-    product ? medicines.filter(m => m.category === product.category && m.id !== product.id).slice(0, 4) : [],
-    [product]
-  );
+  useEffect(() => {
+    if (user) {
+      const fetchWishlistIds = async () => {
+        const { data, error } = await supabase
+          .from('wishlist')
+          .select('product_id')
+          .eq('user_id', user.id);
+        
+        if (!error && data) {
+          setWishlistIds(new Set(data.map(item => item.product_id)));
+        }
+      };
+      fetchWishlistIds();
+    } else {
+      setWishlistIds(new Set());
+    }
+  }, [user]);
+
+  const toggleWishlist = async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Please login to manage wishlist');
+      return;
+    }
+
+    if (wishlistIds.has(productId)) {
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+      
+      if (!error) {
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+        toast.success('Removed from wishlist');
+      } else {
+        toast.error('Failed to remove from wishlist');
+      }
+    } else {
+      const { error } = await supabase
+        .from('wishlist')
+        .insert([{ user_id: user.id, product_id: productId }]);
+      
+      if (!error) {
+        setWishlistIds(prev => {
+          const newSet = new Set(prev);
+          newSet.add(productId);
+          return newSet;
+        });
+        toast.success('Added to wishlist');
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchProduct();
+  }, [id]);
+
+
+  const fetchProduct = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      const mappedProduct = {
+        id: data.id,
+        name: data.name,
+        genericName: data.generic_name,
+        brand: data.brand,
+        manufacturer: data.manufacturer,
+        category: data.category,
+        subCategory: data.sub_category,
+        composition: data.composition,
+        dosageForm: data.dosage_form,
+        packSizes: data.pack_sizes,
+        prescriptionRequired: data.prescription_required,
+        schedule: data.schedule,
+        stock: data.stock,
+        expiryDate: data.expiry_date,
+        rating: data.rating,
+        reviewCount: data.review_count,
+        featured: data.featured,
+        description: data.description,
+        indications: data.indications,
+        sideEffects: data.side_effects,
+        storage: data.storage,
+        images: data.images // Assuming images column exists or we fallback
+      };
+
+      setProduct(mappedProduct);
+      setSelectedPack(mappedProduct.packSizes[0]);
+      fetchRelatedProducts(mappedProduct.category, mappedProduct.id);
+
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      toast.error('Failed to load product details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRelatedProducts = async (category, currentId) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category', category)
+        .neq('id', currentId)
+        .limit(4);
+
+      if (error) throw error;
+
+      const mappedRelated = data.map(p => ({
+        id: p.id,
+        name: p.name,
+        genericName: p.generic_name,
+        brand: p.brand,
+        manufacturer: p.manufacturer,
+        category: p.category,
+        packSizes: p.pack_sizes,
+        rating: p.rating,
+        reviewCount: p.review_count,
+        images: p.images
+      }));
+
+      setRelatedProducts(mappedRelated);
+    } catch (error) {
+      console.error('Error fetching related products:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -69,8 +222,11 @@ const ProductDetail = () => {
         <div className="lg:col-span-6 flex flex-col gap-6 sticky top-24 self-start">
           <div className="aspect-[4/3] bg-white rounded-3xl border border-surface-border p-8 flex items-center justify-center overflow-hidden group shadow-sm relative">
             <div className="absolute top-4 right-4 z-10">
-              <button className="p-3 rounded-full bg-white border border-surface-border text-txt-secondary hover:text-medical-error hover:border-medical-error/30 transition-all shadow-sm">
-                <Heart className="w-5 h-5" />
+              <button 
+                onClick={(e) => toggleWishlist(e, product.id)}
+                className={`p-3 rounded-full bg-white border border-surface-border transition-all shadow-sm ${wishlistIds.has(product.id) ? 'text-medical-error border-medical-error/30' : 'text-txt-secondary hover:text-medical-error hover:border-medical-error/30'}`}
+              >
+                <Heart className={`w-5 h-5 ${wishlistIds.has(product.id) ? 'fill-medical-error' : ''}`} />
               </button>
             </div>
             <img
@@ -149,11 +305,13 @@ const ProductDetail = () => {
 
             <div className="relative z-10">
               <div className="flex items-baseline gap-4 mb-8">
-                <span className="text-5xl font-bold text-txt-dark tracking-tight">₹{selectedPack.price}</span>
-                <span className="text-xl text-txt-placeholder line-through font-medium">₹{selectedPack.mrp}</span>
-                <Badge variant="error" className="text-sm px-3 py-1 font-bold shadow-sm">
-                  {selectedPack.discount}% OFF
-                </Badge>
+                <span className="text-5xl font-bold text-txt-dark tracking-tight">₹{selectedPack?.price || 'N/A'}</span>
+                {selectedPack?.mrp && <span className="text-xl text-txt-placeholder line-through font-medium">₹{selectedPack.mrp}</span>}
+                {selectedPack?.discount > 0 && (
+                  <Badge variant="error" className="text-sm px-3 py-1 font-bold shadow-sm">
+                    {selectedPack.discount}% OFF
+                  </Badge>
+                )}
               </div>
 
               <div className="space-y-8">
@@ -277,7 +435,12 @@ const ProductDetail = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {relatedProducts.map(p => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard 
+              key={p.id} 
+              product={p} 
+              isWishlisted={wishlistIds.has(p.id)}
+              onToggleWishlist={(e) => toggleWishlist(e, p.id)}
+            />
           ))}
         </div>
       </section>

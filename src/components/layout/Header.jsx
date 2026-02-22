@@ -13,7 +13,7 @@ const Header = () => {
   const profileRef = useRef(null);
 
   const cartItemCount = useCartStore((state) => state.getTotalItems());
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, profile, isAuthenticated, logout } = useAuthStore();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -84,10 +84,10 @@ const Header = () => {
                   className="flex items-center gap-2 p-1.5 rounded-full border border-surface-border hover:bg-surface-light hover:border-brand-primary/30 transition-all"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white font-bold text-sm">
-                    {user?.profile?.firstName?.[0] || 'U'}
+                    {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <span className="hidden lg:block text-sm font-semibold text-txt-primary mr-1 max-w-[100px] truncate">
-                    {user?.profile?.firstName || 'Account'}
+                    {profile?.first_name || 'Account'}
                   </span>
                   <ChevronDown className={`hidden lg:block w-4 h-4 text-txt-secondary transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -98,19 +98,14 @@ const Header = () => {
                     {/* User Info Header */}
                     <div className="p-5 bg-gradient-to-r from-brand-primary/5 to-brand-secondary/5 border-b border-surface-border">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                          {user?.profile?.firstName?.[0] || 'U'}
+                        <div className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center text-brand-primary font-black text-lg border border-surface-border">
+                          {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-txt-dark truncate">
-                            {user?.profile?.firstName} {user?.profile?.lastName}
+                        <div>
+                          <p className="font-bold text-txt-dark text-lg leading-tight">
+                            {profile?.first_name} {profile?.last_name}
                           </p>
-                          <p className="text-xs text-txt-secondary truncate">{user?.profile?.email}</p>
-                          {user?.role === 'admin' && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full mt-1">
-                              <ShieldCheck className="w-3 h-3" /> Admin
-                            </span>
-                          )}
+                          <p className="text-xs text-txt-secondary font-medium mt-0.5">{user?.email}</p>
                         </div>
                       </div>
                     </div>
@@ -153,7 +148,7 @@ const Header = () => {
                         </div>
                       </Link>
 
-                      {user?.role === 'admin' && (
+                      {profile?.role === 'admin' && (
                         <Link
                           to="/admin"
                           onClick={() => setIsProfileOpen(false)}
@@ -249,7 +244,7 @@ const Header = () => {
               <Link to="/wishlist" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
                 <Heart className="w-5 h-5 text-txt-placeholder" /> Wishlist
               </Link>
-              {user?.role === 'admin' && (
+              {profile?.role === 'admin' && (
                 <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-brand-primary font-semibold hover:bg-brand-primary/5 transition-colors">
                   <LayoutDashboard className="w-5 h-5" /> Admin Panel
                 </Link>
