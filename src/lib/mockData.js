@@ -92,7 +92,7 @@ export const mockProducts = [
     stock: 3000,
     prescription_required: true,
     description: "Reduces stomach acid, used for GERD and ulcers.",
-    images: ["https://images.unsplash.com/photo-1550572017-edd951aa8f72?auto=format&fit=crop&q=80&w=400"],
+    images: ["https://images.unsplash.com/photo-1550572017-4fcdbb560207?auto=format&fit=crop&q=80&w=400"],
     featured: true
   },
   {

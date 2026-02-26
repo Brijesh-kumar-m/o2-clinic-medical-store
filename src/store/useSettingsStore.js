@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { supabase, isMockMode } from '../lib/supabase';
 
 export const useSettingsStore = create((set, get) => ({
   gstRate: 12.0,
@@ -37,6 +37,14 @@ export const useSettingsStore = create((set, get) => ({
 
   updateSettings: async (newSettings) => {
     try {
+      if (isMockMode) {
+          set((state) => ({
+            ...state,
+            ...newSettings
+          }));
+          return true;
+      }
+
       const { error } = await supabase
         .from('app_settings')
         .upsert({

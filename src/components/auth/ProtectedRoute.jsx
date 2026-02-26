@@ -3,7 +3,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
+const ProtectedRoute = ({ children, allowedRoles, unauthenticatedTo = '/login', unauthorizedTo = '/unauthorized' }) => {
   const { isAuthenticated, user, profile, loading } = useAuthStore();
   const location = useLocation();
 
@@ -16,12 +16,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={unauthenticatedTo} state={{ from: location }} replace />;
   }
 
   // If roles are specified, check if user has required role
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to={unauthorizedTo} replace />;
   }
 
   // Check for approval status if user is a doctor/pharmacy

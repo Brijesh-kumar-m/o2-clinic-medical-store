@@ -44,6 +44,14 @@ const Orders = () => {
             status: 'delivered',
             prescription_url: 'mock-url',
             order_items: new Array(1)
+          },
+          {
+            id: 'ORD-MOCK-003',
+            created_at: new Date().toISOString(),
+            total_amount: 450,
+            status: 'pending',
+            prescription_url: null,
+            order_items: new Array(1)
           }
         ];
       } else {
@@ -105,6 +113,36 @@ const Orders = () => {
     }
   };
 
+  const handleCancelOrder = async (e, orderId) => {
+    e.stopPropagation(); // Prevent card click
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+
+    try {
+      if (isMockMode) {
+        setOrders(orders.map(o => 
+          o.id === orderId ? { ...o, status: 'Cancelled' } : o
+        ));
+        toast.success('Order cancelled successfully');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'cancelled' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setOrders(orders.map(o => 
+        o.id === orderId ? { ...o, status: 'Cancelled' } : o
+      ));
+      toast.success('Order cancelled successfully');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast.error('Failed to cancel order');
+    }
+  };
+
   const filteredOrders = activeTab === 'all'
     ? orders
     : orders.filter(o => o.status.toLowerCase().replace(' ', '') === activeTab);
@@ -133,7 +171,7 @@ const Orders = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-        {['all', 'delivered', 'in transit', 'cancelled'].map((tab) => (
+        {['all', 'pending', 'delivered', 'in transit', 'cancelled'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -194,6 +232,17 @@ const Orders = () => {
                       </Badge>
                     </div>
 
+                    {order.status === 'Pending' && (
+                        <Button 
+                            variant="destructive" 
+                            size="sm"
+                            className="text-xs px-3 h-8 bg-red-100 text-red-600 hover:bg-red-200 border border-red-200"
+                            onClick={(e) => handleCancelOrder(e, order.id)}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+
                     <ChevronRight className="w-5 h-5 text-txt-placeholder group-hover:text-brand-primary group-hover:translate-x-1 transition-all hidden md:block" />
                   </div>
                 </div>
@@ -220,14 +269,18 @@ const Orders = () => {
             </motion.div>
           ))
         ) : (
-          <div className="text-center py-20 bg-surface-bg/50 rounded-3xl border-2 border-dashed border-surface-border">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-txt-placeholder mx-auto mb-4 shadow-sm">
-              <Package className="w-8 h-8" />
+          <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl border border-dashed border-surface-border">
+            <div className="w-20 h-20 bg-surface-bg rounded-full flex items-center justify-center text-txt-placeholder mb-6">
+              <Package className="w-10 h-10 opacity-50" />
             </div>
-            <h3 className="text-lg font-bold text-txt-dark mb-2">No orders found</h3>
-            <p className="text-txt-secondary mb-6 max-w-sm mx-auto">It looks like you haven't placed any orders in this category yet.</p>
+            <h2 className="text-xl font-bold text-txt-dark mb-2">No orders found</h2>
+            <p className="text-txt-secondary mb-8 max-w-sm mx-auto">
+              It looks like you haven't placed any orders in this category yet. Start shopping to see your orders here.
+            </p>
             <Link to="/products">
-              <Button>Start Shopping <ArrowRight className="ml-2 w-4 h-4" /></Button>
+              <Button className="rounded-full px-8 flex items-center gap-2">
+                Start Shopping <ArrowRight className="w-4 h-4" />
+              </Button>
             </Link>
           </div>
         )}

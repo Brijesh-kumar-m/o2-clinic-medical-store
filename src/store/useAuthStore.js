@@ -4,6 +4,11 @@ import { supabase, isMockMode } from '../lib/supabase';
 import { useCartStore } from './useCartStore';
 import toast from 'react-hot-toast';
 
+const MOCK_ADMIN_CREDENTIALS = {
+  email: 'admin@demo.com',
+  password: 'admin123'
+};
+
 const MOCK_USER = {
   id: 'mock-user-id',
   email: 'doctor@demo.com',
@@ -13,17 +18,32 @@ const MOCK_USER = {
   }
 };
 
-const MOCK_PROFILE = {
-  id: 'mock-user-id',
+const MOCK_ADMIN_PROFILE = {
+  id: 'mock-admin-id',
   first_name: 'Demo',
   last_name: 'Admin',
-  email: 'admin@demo.com',
+  email: MOCK_ADMIN_CREDENTIALS.email,
   role: 'admin',
+  phone: '9876543210',
+  license_number: 'ADMIN-0001',
+  clinic_name: 'O2Clinic Admin',
+  address: 'Head Office',
+  specialization: 'Administration',
+  status: 'approved'
+};
+
+const MOCK_DOCTOR_PROFILE = {
+  id: 'mock-user-id',
+  first_name: 'Demo',
+  last_name: 'Doctor',
+  email: 'doctor@demo.com',
+  role: 'doctor',
   phone: '9876543210',
   license_number: 'MCI-12345',
   clinic_name: 'Demo Clinic',
   address: '123 Medical Lane, Health City',
-  specialization: 'General Physician'
+  specialization: 'General Physician',
+  status: 'approved'
 };
 
 export const useAuthStore = create((set, get) => ({
@@ -36,43 +56,86 @@ export const useAuthStore = create((set, get) => ({
   initializeAuth: async () => {
     set({ loading: true });
     
-    // Get current session
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session?.user) {
-      // Fetch profile
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-        
-      if (profile) {
-        set({ user: session.user, profile, isAuthenticated: true, loading: false });
-        useCartStore.getState().fetchCart();
-      } else {
-        // If no profile found (shouldn't happen with triggers), just set user
-        set({ user: session.user, isAuthenticated: true, loading: false });
-        useCartStore.getState().fetchCart();
+    try {
+      if (isMockMode) {
+         const isMockAuth = localStorage.getItem('mock_auth_user');
+         if (isMockAuth) {
+            const storedRole = localStorage.getItem('mock_auth_role') || 'doctor';
+            const storedEmail = localStorage.getItem('mock_auth_email') || '';
+            const isAdmin = storedRole === 'admin';
+
+            // Restore mock session
+             set({ 
+                user: { ...MOCK_USER, id: isAdmin ? MOCK_ADMIN_PROFILE.id : MOCK_DOCTOR_PROFILE.id, email: storedEmail || (isAdmin ? MOCK_ADMIN_PROFILE.email : MOCK_DOCTOR_PROFILE.email) }, 
+                profile: isAdmin ? { ...MOCK_ADMIN_PROFILE, email: storedEmail || MOCK_ADMIN_PROFILE.email } : { ...MOCK_DOCTOR_PROFILE, email: storedEmail || MOCK_DOCTOR_PROFILE.email }, 
+                isAuthenticated: true, 
+                loading: false 
+             });
+             useCartStore.getState().fetchCart();
+             return;
+         }
       }
-    } else {
+
+      // Get current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      
+      if (session?.user) {
+        let profile = null;
+        try {
+          // Fetch profile
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (error) throw error;
+          profile = data;
+        } catch (profileError) {
+          console.warn('Error fetching profile:', profileError);
+        }
+          
+        if (profile) {
+          set({ user: session.user, profile, isAuthenticated: true, loading: false });
+          useCartStore.getState().fetchCart();
+        } else {
+          // If no profile found (shouldn't happen with triggers), just set user
+          set({ user: session.user, isAuthenticated: true, loading: false });
+          useCartStore.getState().fetchCart();
+        }
+      } else {
+        set({ user: null, profile: null, isAuthenticated: false, loading: false });
+        useCartStore.getState().resetCart();
+      }
+    } catch (error) {
+      console.error('Auth initialization error:', error);
       set({ user: null, profile: null, isAuthenticated: false, loading: false });
-      useCartStore.getState().resetCart();
     }
 
     // Listen for changes
     supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-         const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-        set({ user: session.user, profile, isAuthenticated: true, loading: false });
-        useCartStore.getState().fetchCart();
-      } else {
-        set({ user: null, profile: null, isAuthenticated: false, loading: false });
-        useCartStore.getState().resetCart();
+      try {
+        if (session?.user) {
+          let profile = null;
+          try {
+             const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            profile = data;
+          } catch (e) { console.warn('Profile fetch error in listener', e); }
+
+          set({ user: session.user, profile, isAuthenticated: true, loading: false });
+          useCartStore.getState().fetchCart();
+        } else {
+          set({ user: null, profile: null, isAuthenticated: false, loading: false });
+          useCartStore.getState().resetCart();
+        }
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        set({ loading: false });
       }
     });
   },
@@ -83,11 +146,23 @@ export const useAuthStore = create((set, get) => ({
     if (isMockMode) {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      const isAdminLogin =
+        normalizedEmail === MOCK_ADMIN_CREDENTIALS.email.toLowerCase() &&
+        password === MOCK_ADMIN_CREDENTIALS.password;
+
+      const profile = isAdminLogin
+        ? { ...MOCK_ADMIN_PROFILE }
+        : { ...MOCK_DOCTOR_PROFILE, email: email };
+
       localStorage.setItem('mock_auth_user', 'true');
+      localStorage.setItem('mock_auth_role', profile.role);
+      localStorage.setItem('mock_auth_email', email);
+
       set({ 
-        user: { ...MOCK_USER, email }, 
-        profile: { ...MOCK_PROFILE, email }, 
+        user: { ...MOCK_USER, id: profile.id, email }, 
+        profile, 
         isAuthenticated: true, 
         loading: false 
       });
@@ -113,8 +188,128 @@ export const useAuthStore = create((set, get) => ({
       set({ loading: false });
       return false;
     }
-    
-    toast.success('Logged in successfully');
+
+    try {
+      const signedInUser = data?.session?.user || data?.user;
+      let profile = null;
+
+      if (signedInUser) {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', signedInUser.id)
+            .single();
+          if (profileError) throw profileError;
+          profile = profileData;
+        } catch (profileError) {
+          console.warn('Error fetching profile after login:', profileError);
+        }
+      }
+
+      set({ user: signedInUser || null, profile, isAuthenticated: !!signedInUser, loading: false });
+      if (signedInUser) {
+        useCartStore.getState().fetchCart();
+      }
+      toast.success('Logged in successfully');
+      return true;
+    } catch (e) {
+      console.error('Post-login state update failed:', e);
+      set({ loading: false });
+      toast.error('Login succeeded, but failed to load profile.');
+      return true;
+    }
+  },
+
+  loginAdmin: async (email, password) => {
+    set({ loading: true });
+
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const isMockAdmin =
+      normalizedEmail === MOCK_ADMIN_CREDENTIALS.email.toLowerCase() &&
+      password === MOCK_ADMIN_CREDENTIALS.password;
+
+    if (isMockAdmin) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      localStorage.setItem('force_mock_mode', 'true');
+      localStorage.setItem('mock_auth_user', 'true');
+      localStorage.setItem('mock_auth_role', 'admin');
+      localStorage.setItem('mock_auth_email', MOCK_ADMIN_PROFILE.email);
+
+      // Force a page reload to ensure isMockMode is updated across all components
+      set({
+        user: { ...MOCK_USER, id: MOCK_ADMIN_PROFILE.id, email: MOCK_ADMIN_PROFILE.email },
+        profile: { ...MOCK_ADMIN_PROFILE },
+        isAuthenticated: true,
+        loading: false
+      });
+      useCartStore.getState().fetchCart();
+      toast.success('Admin login successful (Mock Mode forced)');
+      
+      // Small delay before reload to let toast show
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+      
+      return true;
+    }
+
+    if (isMockMode) {
+      // If we are already in mock mode but credentials didn't match the special admin one
+      set({ loading: false });
+      toast.error('Invalid admin email or password.');
+      return false;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Login error:", error);
+      if (error.message.includes('Email not confirmed')) {
+        toast.error('Email not confirmed. Please disable "Confirm email" in Supabase Auth settings.');
+      } else if (error.message.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password.');
+      } else {
+        toast.error(error.message);
+      }
+      set({ loading: false });
+      return false;
+    }
+
+    const signedInUser = data?.session?.user || data?.user;
+    let profile = null;
+
+    if (signedInUser) {
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', signedInUser.id)
+          .single();
+        if (profileError) throw profileError;
+        profile = profileData;
+      } catch (profileError) {
+        console.warn('Error fetching profile after admin login:', profileError);
+      }
+    }
+
+    if (!profile || profile.role !== 'admin') {
+      try {
+        await supabase.auth.signOut();
+      } catch {}
+      set({ user: null, profile: null, isAuthenticated: false, loading: false });
+      useCartStore.getState().resetCart();
+      toast.error('Admin access required.');
+      return false;
+    }
+
+    set({ user: signedInUser || null, profile, isAuthenticated: !!signedInUser, loading: false });
+    useCartStore.getState().fetchCart();
+    toast.success('Admin login successful');
     return true;
   },
 
@@ -126,8 +321,11 @@ export const useAuthStore = create((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 800));
       
       localStorage.setItem('mock_auth_user', 'true');
+      localStorage.setItem('mock_auth_role', metadata?.role || 'doctor');
+      localStorage.setItem('mock_auth_email', email);
+
       const mockUser = { ...MOCK_USER, email, user_metadata: metadata };
-      const mockProfile = { ...MOCK_PROFILE, email, ...metadata };
+      const mockProfile = { ...MOCK_DOCTOR_PROFILE, email, ...metadata, role: metadata?.role || 'doctor', status: 'approved' };
       
       set({ 
         user: mockUser, 
@@ -180,6 +378,17 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logout: async () => {
+    localStorage.removeItem('force_mock_mode');
+    if (isMockMode) {
+      localStorage.removeItem('mock_auth_user');
+      localStorage.removeItem('mock_auth_role');
+      localStorage.removeItem('mock_auth_email');
+      set({ user: null, profile: null, isAuthenticated: false, loading: false });
+      useCartStore.getState().resetCart();
+      toast.success('Logged out');
+      return;
+    }
+
     await supabase.auth.signOut();
     set({ user: null, profile: null, isAuthenticated: false });
     useCartStore.getState().resetCart();

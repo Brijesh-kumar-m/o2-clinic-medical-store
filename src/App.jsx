@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Orders from './pages/Orders';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
 import Wishlist from './pages/Wishlist';
 import Support from './pages/Support';
 import Legal from './pages/Legal';
@@ -90,11 +91,12 @@ function App() {
             } 
           />
           
-          {/* Admin Route */}
+          {/* Admin Routes */}
+          <Route path="admin/login" element={<AdminLogin />} />
           <Route 
             path="admin" 
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['admin']} unauthenticatedTo="/admin/login" unauthorizedTo="/admin/login">
                 <AdminDashboard />
               </ProtectedRoute>
             } 

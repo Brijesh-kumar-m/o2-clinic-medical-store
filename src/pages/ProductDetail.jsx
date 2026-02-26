@@ -15,6 +15,7 @@ import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import ProductCard from '../components/features/ProductCard';
 import { supabase } from '../lib/supabase';
+import { mockProducts } from '../lib/mockData';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -99,13 +100,21 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single();
+      let data;
+      try {
+        const result = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-      if (error) throw error;
+        if (result.error) throw result.error;
+        data = result.data;
+      } catch (err) {
+        console.warn('Supabase fetch failed, falling back to mock data:', err);
+        data = mockProducts.find(p => p.id === id);
+        if (!data) throw new Error('Product not found');
+      }
 
       const mappedProduct = {
         id: data.id,
@@ -146,14 +155,21 @@ const ProductDetail = () => {
 
   const fetchRelatedProducts = async (category, currentId) => {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('category', category)
-        .neq('id', currentId)
-        .limit(4);
+      let data;
+      try {
+        const result = await supabase
+          .from('products')
+          .select('*')
+          .eq('category', category)
+          .neq('id', currentId)
+          .limit(4);
 
-      if (error) throw error;
+        if (result.error) throw result.error;
+        data = result.data;
+      } catch (err) {
+        console.warn('Supabase fetch failed, falling back to mock data:', err);
+        data = mockProducts.filter(p => p.category === category && p.id !== currentId).slice(0, 4);
+      }
 
       const mappedRelated = data.map(p => ({
         id: p.id,

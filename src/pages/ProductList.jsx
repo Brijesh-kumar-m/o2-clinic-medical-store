@@ -145,36 +145,52 @@ const ProductList = () => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        let data, error;
-
-        if (isMockMode) {
-          console.log('Using mock data for ProductList');
-          // Simulate network delay
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
-            const q = debouncedSearchQuery.toLowerCase();
-            data = mockProducts.filter(p => 
-              p.name.toLowerCase().includes(q) || 
-              p.generic_name.toLowerCase().includes(q) ||
-              p.brand.toLowerCase().includes(q)
-            );
+        let data;
+        
+        // Inner try-catch for Supabase fetching with fallback
+        try {
+          let error = null;
+          if (isMockMode) {
+            console.log('Using mock data for ProductList');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+              const q = debouncedSearchQuery.toLowerCase();
+              data = mockProducts.filter(p => 
+                p.name.toLowerCase().includes(q) || 
+                p.generic_name.toLowerCase().includes(q) ||
+                p.brand.toLowerCase().includes(q)
+              );
+            } else {
+              data = mockProducts;
+            }
           } else {
-            data = mockProducts;
+            if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+              const result = await supabase.rpc('search_medicines', { search_query: debouncedSearchQuery });
+              data = result.data;
+              error = result.error;
+            } else {
+              const result = await supabase.from('products').select('*');
+              data = result.data;
+              error = result.error;
+            }
           }
-        } else {
+
+          if (error) throw error;
+        } catch (err) {
+          console.warn('Supabase fetch failed, falling back to mock data:', err);
+          // Fallback to mock data on error
           if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
-            const result = await supabase.rpc('search_medicines', { search_query: debouncedSearchQuery });
-            data = result.data;
-            error = result.error;
+              const q = debouncedSearchQuery.toLowerCase();
+              data = mockProducts.filter(p => 
+                p.name.toLowerCase().includes(q) || 
+                p.generic_name.toLowerCase().includes(q) ||
+                p.brand.toLowerCase().includes(q)
+              );
           } else {
-            const result = await supabase.from('products').select('*');
-            data = result.data;
-            error = result.error;
+              data = mockProducts;
           }
         }
-
-        if (error) throw error;
 
         // Map snake_case to camelCase for frontend components
         const mappedProducts = (data || []).map(p => ({
@@ -224,15 +240,7 @@ const ProductList = () => {
     return products
       .filter(m => {
         const q = searchQuery.toLowerCase();
-        const matchesSearch = true; // Search handled by RPC or fetch all
-        // (If fetching all, we might want client-side search for small strings < 3 chars)
-        // But for simplicity, let's keep client-side filtering as fallback if RPC not used
-        // Actually, if we use RPC, 'products' is already filtered by search.
-        // If we fetched all, 'products' is all.
-        // So we should only apply client-side search if we fetched all AND query is short?
-        // No, if query is short (<3), we fetch ALL. Then we should filter client-side?
-        // Yes.
-
+        
         let matchesClientSearch = true;
         if (!debouncedSearchQuery || debouncedSearchQuery.length <= 2) {
              matchesClientSearch = searchQuery === '' ||
@@ -256,7 +264,7 @@ const ProductList = () => {
         if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
         return 0; // popular/default
       });
-  }, [searchQuery, selectedCategory, selectedManufacturer, sortBy, products]);
+  }, [searchQuery, selectedCategory, selectedManufacturer, sortBy, products, debouncedSearchQuery]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
