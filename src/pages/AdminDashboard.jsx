@@ -233,6 +233,12 @@ const AdminDashboard = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
+      if (isMockMode) {
+        setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        toast.success(`Order ${id.length > 12 ? id.slice(0, 12) + '...' : id} → ${newStatus}`);
+        return;
+      }
+
       const statusLower = newStatus.toLowerCase();
       const { error } = await supabase
         .from('orders')
@@ -242,7 +248,7 @@ const AdminDashboard = () => {
       if (error) throw error;
 
       setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
-      toast.success(`Order ${id.slice(0, 12)}... → ${newStatus}`);
+      toast.success(`Order ${id.length > 12 ? id.slice(0, 12) + '...' : id} → ${newStatus}`);
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update status');
@@ -251,6 +257,12 @@ const AdminDashboard = () => {
 
   const handleUserStatusChange = async (id, newStatus) => {
     try {
+      if (isMockMode) {
+        setUsers(users.map(u => u.id === id ? { ...u, status: newStatus } : u));
+        toast.success(`User marked as ${newStatus}`);
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({ status: newStatus })
@@ -410,8 +422,8 @@ const AdminDashboard = () => {
                     setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 group ${isActive
-                      ? 'bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-brand-primary/25'
-                      : 'text-txt-secondary hover:bg-surface-bg hover:text-txt-dark'
+                    ? 'bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-brand-primary/25'
+                    : 'text-txt-secondary hover:bg-surface-bg hover:text-txt-dark'
                     }`}
                 >
                   <div className="flex items-center gap-3">

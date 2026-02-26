@@ -55,31 +55,31 @@ export const useAuthStore = create((set, get) => ({
   // Initialize session
   initializeAuth: async () => {
     set({ loading: true });
-    
+
     try {
       if (isMockMode) {
-         const isMockAuth = localStorage.getItem('mock_auth_user');
-         if (isMockAuth) {
-            const storedRole = localStorage.getItem('mock_auth_role') || 'doctor';
-            const storedEmail = localStorage.getItem('mock_auth_email') || '';
-            const isAdmin = storedRole === 'admin';
+        const isMockAuth = localStorage.getItem('mock_auth_user');
+        if (isMockAuth) {
+          const storedRole = localStorage.getItem('mock_auth_role') || 'doctor';
+          const storedEmail = localStorage.getItem('mock_auth_email') || '';
+          const isAdmin = storedRole === 'admin';
 
-            // Restore mock session
-             set({ 
-                user: { ...MOCK_USER, id: isAdmin ? MOCK_ADMIN_PROFILE.id : MOCK_DOCTOR_PROFILE.id, email: storedEmail || (isAdmin ? MOCK_ADMIN_PROFILE.email : MOCK_DOCTOR_PROFILE.email) }, 
-                profile: isAdmin ? { ...MOCK_ADMIN_PROFILE, email: storedEmail || MOCK_ADMIN_PROFILE.email } : { ...MOCK_DOCTOR_PROFILE, email: storedEmail || MOCK_DOCTOR_PROFILE.email }, 
-                isAuthenticated: true, 
-                loading: false 
-             });
-             useCartStore.getState().fetchCart();
-             return;
-         }
+          // Restore mock session
+          set({
+            user: { ...MOCK_USER, id: isAdmin ? MOCK_ADMIN_PROFILE.id : MOCK_DOCTOR_PROFILE.id, email: storedEmail || (isAdmin ? MOCK_ADMIN_PROFILE.email : MOCK_DOCTOR_PROFILE.email) },
+            profile: isAdmin ? { ...MOCK_ADMIN_PROFILE, email: storedEmail || MOCK_ADMIN_PROFILE.email } : { ...MOCK_DOCTOR_PROFILE, email: storedEmail || MOCK_DOCTOR_PROFILE.email },
+            isAuthenticated: true,
+            loading: false
+          });
+          useCartStore.getState().fetchCart();
+          return;
+        }
       }
 
       // Get current session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
-      
+
       if (session?.user) {
         let profile = null;
         try {
@@ -89,13 +89,13 @@ export const useAuthStore = create((set, get) => ({
             .select('*')
             .eq('id', session.user.id)
             .single();
-            
+
           if (error) throw error;
           profile = data;
         } catch (profileError) {
           console.warn('Error fetching profile:', profileError);
         }
-          
+
         if (profile) {
           set({ user: session.user, profile, isAuthenticated: true, loading: false });
           useCartStore.getState().fetchCart();
@@ -119,11 +119,11 @@ export const useAuthStore = create((set, get) => ({
         if (session?.user) {
           let profile = null;
           try {
-             const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+            const { data } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
             profile = data;
           } catch (e) { console.warn('Profile fetch error in listener', e); }
 
@@ -160,11 +160,11 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem('mock_auth_role', profile.role);
       localStorage.setItem('mock_auth_email', email);
 
-      set({ 
-        user: { ...MOCK_USER, id: profile.id, email }, 
-        profile, 
-        isAuthenticated: true, 
-        loading: false 
+      set({
+        user: { ...MOCK_USER, id: profile.id, email },
+        profile,
+        isAuthenticated: true,
+        loading: false
       });
       useCartStore.getState().fetchCart();
       toast.success('Logged in (Mock Mode)');
@@ -224,20 +224,25 @@ export const useAuthStore = create((set, get) => ({
   loginAdmin: async (email, password) => {
     set({ loading: true });
 
-    const normalizedEmail = String(email || '').trim().toLowerCase();
-    const isMockAdmin =
-      normalizedEmail === MOCK_ADMIN_CREDENTIALS.email.toLowerCase() &&
-      password === MOCK_ADMIN_CREDENTIALS.password;
+    // Only use mock admin login if we're ALREADY in mock mode (no real Supabase credentials)
+    if (isMockMode) {
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      const isMockAdmin =
+        normalizedEmail === MOCK_ADMIN_CREDENTIALS.email.toLowerCase() &&
+        password === MOCK_ADMIN_CREDENTIALS.password;
 
-    if (isMockAdmin) {
+      if (!isMockAdmin) {
+        set({ loading: false });
+        toast.error('Invalid admin email or password.');
+        return false;
+      }
+
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      localStorage.setItem('force_mock_mode', 'true');
+
       localStorage.setItem('mock_auth_user', 'true');
       localStorage.setItem('mock_auth_role', 'admin');
-      localStorage.setItem('mock_auth_email', MOCK_ADMIN_PROFILE.email);
+      localStorage.setItem('mock_auth_email', MOCK_ADMIN_CREDENTIALS.email);
 
-      // Force a page reload to ensure isMockMode is updated across all components
       set({
         user: { ...MOCK_USER, id: MOCK_ADMIN_PROFILE.id, email: MOCK_ADMIN_PROFILE.email },
         profile: { ...MOCK_ADMIN_PROFILE },
@@ -245,23 +250,11 @@ export const useAuthStore = create((set, get) => ({
         loading: false
       });
       useCartStore.getState().fetchCart();
-      toast.success('Admin login successful (Mock Mode forced)');
-      
-      // Small delay before reload to let toast show
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-      
+      toast.success('Admin login successful (Mock Mode)');
       return true;
     }
 
-    if (isMockMode) {
-      // If we are already in mock mode but credentials didn't match the special admin one
-      set({ loading: false });
-      toast.error('Invalid admin email or password.');
-      return false;
-    }
-
+    // Real Supabase login for admin
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -300,7 +293,7 @@ export const useAuthStore = create((set, get) => ({
     if (!profile || profile.role !== 'admin') {
       try {
         await supabase.auth.signOut();
-      } catch {}
+      } catch { }
       set({ user: null, profile: null, isAuthenticated: false, loading: false });
       useCartStore.getState().resetCart();
       toast.error('Admin access required.');
@@ -319,19 +312,19 @@ export const useAuthStore = create((set, get) => ({
     if (isMockMode) {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
       localStorage.setItem('mock_auth_user', 'true');
       localStorage.setItem('mock_auth_role', metadata?.role || 'doctor');
       localStorage.setItem('mock_auth_email', email);
 
       const mockUser = { ...MOCK_USER, email, user_metadata: metadata };
       const mockProfile = { ...MOCK_DOCTOR_PROFILE, email, ...metadata, role: metadata?.role || 'doctor', status: 'approved' };
-      
-      set({ 
-        user: mockUser, 
-        profile: mockProfile, 
-        isAuthenticated: true, 
-        loading: false 
+
+      set({
+        user: mockUser,
+        profile: mockProfile,
+        isAuthenticated: true,
+        loading: false
       });
       useCartStore.getState().fetchCart();
       toast.success('Registration successful (Mock Mode)');
@@ -362,10 +355,10 @@ export const useAuthStore = create((set, get) => ({
     }
 
     if (data?.session) {
-      set({ 
-        user: data.session.user, 
-        isAuthenticated: true, 
-        loading: false 
+      set({
+        user: data.session.user,
+        isAuthenticated: true,
+        loading: false
       });
       useCartStore.getState().fetchCart();
       toast.success('Registration successful! Logging in...');
@@ -400,8 +393,8 @@ export const useAuthStore = create((set, get) => ({
     if (!user) return false;
 
     if (isMockMode) {
-       // Update local state only
-       set((state) => ({
+      // Update local state only
+      set((state) => ({
         profile: { ...state.profile, ...updates }
       }));
       toast.success('Profile updated (Mock Mode)');
@@ -422,7 +415,7 @@ export const useAuthStore = create((set, get) => ({
     set((state) => ({
       profile: { ...state.profile, ...updates }
     }));
-    
+
     toast.success('Profile updated successfully');
     return true;
   }

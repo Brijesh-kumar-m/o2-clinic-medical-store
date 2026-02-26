@@ -14,10 +14,19 @@ export const supabase = createClient(
 );
 
 const isCredentialsMissing = !supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder');
-const isForcedMock = typeof window !== 'undefined' && localStorage.getItem('force_mock_mode') === 'true';
 
-export const isMockMode = isCredentialsMissing || isForcedMock;
+// Only use mock mode when credentials are genuinely missing.
+// force_mock_mode is only respected when credentials are missing (not to override real credentials).
+if (!isCredentialsMissing && typeof window !== 'undefined') {
+  // Clean up stale force_mock_mode flag if real credentials exist
+  localStorage.removeItem('force_mock_mode');
+}
+
+export const isMockMode = isCredentialsMissing;
 
 if (isMockMode) {
-  console.log(`⚠️ Running in Mock Mode: ${isForcedMock ? 'Forced by user' : 'Supabase credentials not found'}.`);
+  console.log(`⚠️ Running in Mock Mode: Supabase credentials not found.`);
+} else {
+  console.log(`✅ Running in Deploy Mode: Connected to Supabase.`);
 }
+
