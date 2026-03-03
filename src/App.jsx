@@ -21,6 +21,13 @@ import Support from './pages/Support';
 import Legal from './pages/Legal';
 import Unauthorized from './pages/Unauthorized';
 
+// Blood Test Module Pages
+import BloodTests from './pages/BloodTests';
+import BloodTestDetail from './pages/BloodTestDetail';
+import BloodTestBookings from './pages/BloodTestBookings';
+import AdminBloodTests from './pages/AdminBloodTests';
+import AdminTestBookings from './pages/AdminTestBookings';
+
 import ScrollToTop from './components/ScrollToTop';
 import { Toaster } from 'react-hot-toast';
 
@@ -56,50 +63,78 @@ function App() {
           <Route path="support" element={<Support />} />
           <Route path="legal" element={<Legal />} />
           <Route path="unauthorized" element={<Unauthorized />} />
-          
+
           {/* Protected Routes */}
-          <Route 
-            path="checkout" 
+          <Route
+            path="checkout"
             element={
               <ProtectedRoute>
                 <Checkout />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="orders" 
+          <Route
+            path="orders"
             element={
               <ProtectedRoute>
                 <Orders />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="dashboard" 
+          <Route
+            path="dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="wishlist" 
+          <Route
+            path="wishlist"
             element={
               <ProtectedRoute>
                 <Wishlist />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
+          {/* Blood Test Routes for Doctors/Users */}
+          <Route path="blood-tests" element={<BloodTests />} />
+          <Route path="blood-tests/:id" element={<BloodTestDetail />} />
+          <Route
+            path="blood-test-bookings"
+            element={
+              <ProtectedRoute>
+                <BloodTestBookings />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Admin Routes */}
           <Route path="admin/login" element={<AdminLogin />} />
-          <Route 
-            path="admin" 
+          <Route
+            path="admin"
             element={
               <ProtectedRoute allowedRoles={['admin']} unauthenticatedTo="/admin/login" unauthorizedTo="/admin/login">
                 <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
+          />
+          <Route
+            path="admin/blood-tests"
+            element={
+              <ProtectedRoute allowedRoles={['admin']} unauthenticatedTo="/admin/login" unauthorizedTo="/admin/login">
+                <AdminBloodTests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/test-bookings"
+            element={
+              <ProtectedRoute allowedRoles={['admin']} unauthenticatedTo="/admin/login" unauthorizedTo="/admin/login">
+                <AdminTestBookings />
+              </ProtectedRoute>
+            }
           />
         </Route>
       </Routes>

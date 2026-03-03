@@ -37,7 +37,7 @@ const ProductDetail = () => {
           .from('wishlist')
           .select('product_id')
           .eq('user_id', user.id);
-        
+
         if (!error && data) {
           setWishlistIds(new Set(data.map(item => item.product_id)));
         }
@@ -51,7 +51,7 @@ const ProductDetail = () => {
   const toggleWishlist = async (e, productId) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error('Please login to manage wishlist');
       return;
@@ -63,7 +63,7 @@ const ProductDetail = () => {
         .delete()
         .eq('user_id', user.id)
         .eq('product_id', productId);
-      
+
       if (!error) {
         setWishlistIds(prev => {
           const newSet = new Set(prev);
@@ -78,7 +78,7 @@ const ProductDetail = () => {
       const { error } = await supabase
         .from('wishlist')
         .insert([{ user_id: user.id, product_id: productId }]);
-      
+
       if (!error) {
         setWishlistIds(prev => {
           const newSet = new Set(prev);
@@ -238,7 +238,7 @@ const ProductDetail = () => {
         <div className="lg:col-span-6 flex flex-col gap-6 sticky top-24 self-start">
           <div className="aspect-[4/3] bg-white rounded-3xl border border-surface-border p-8 flex items-center justify-center overflow-hidden group shadow-sm relative">
             <div className="absolute top-4 right-4 z-10">
-              <button 
+              <button
                 onClick={(e) => toggleWishlist(e, product.id)}
                 className={`p-3 rounded-full bg-white border border-surface-border transition-all shadow-sm ${wishlistIds.has(product.id) ? 'text-medical-error border-medical-error/30' : 'text-txt-secondary hover:text-medical-error hover:border-medical-error/30'}`}
               >
@@ -406,7 +406,7 @@ const ProductDetail = () => {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase text-txt-placeholder tracking-widest mb-0.5">Manufacturer</p>
-                <p className="text-sm font-bold text-txt-dark truncate">{product.manufacturer.name}</p>
+                <p className="text-sm font-bold text-txt-dark truncate">{product.manufacturer?.name || 'Unknown'}</p>
               </div>
             </div>
             <div className="p-4 border border-surface-border rounded-2xl bg-surface-light/30 flex items-center gap-4 hover:border-brand-primary/30 transition-colors">
@@ -459,9 +459,9 @@ const ProductDetail = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {relatedProducts.map(p => (
-            <ProductCard 
-              key={p.id} 
-              product={p} 
+            <ProductCard
+              key={p.id}
+              product={p}
               isWishlisted={wishlistIds.has(p.id)}
               onToggleWishlist={(e) => toggleWishlist(e, p.id)}
             />

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Heart, Menu, X, LogIn, ChevronDown, Package, LayoutDashboard, Settings, LogOut, ShieldCheck, UserCircle } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, Menu, X, LogIn, ChevronDown, Package, LayoutDashboard, Settings, LogOut, ShieldCheck, UserCircle, Activity } from 'lucide-react';
 import Logo from '../ui/Logo';
 import { useCartStore } from '../../store/useCartStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -49,11 +49,29 @@ const Header = () => {
             <Logo className="w-10 h-10 transition-transform group-hover:scale-105" />
           </Link>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl relative">
+          {/* Search Bar & Nav Links */}
+          <div className="hidden lg:flex items-center gap-8 flex-1 max-w-2xl px-4">
+            <nav className="flex items-center gap-6">
+              <Link to="/" className="text-sm font-bold text-txt-secondary hover:text-brand-primary transition-colors">Home</Link>
+              <Link to="/products" className="text-sm font-bold text-txt-secondary hover:text-brand-primary transition-colors">Catalog</Link>
+              <Link to="/blood-tests" className="text-sm font-bold text-txt-secondary hover:text-medical-error transition-colors">Blood Tests</Link>
+            </nav>
+            <form onSubmit={handleSearch} className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search medicines..."
+                className="w-full pl-11 pr-4 py-2.5 rounded-full border border-surface-border bg-surface-light focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all outline-none text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-txt-placeholder w-4 h-4" />
+            </form>
+          </div>
+
+          <form onSubmit={handleSearch} className="hidden md:flex lg:hidden flex-1 max-w-xl relative">
             <input
               type="text"
-              placeholder="Search medicines, generic names..."
+              placeholder="Search medicines..."
               className="w-full pl-11 pr-4 py-sm rounded-full border border-surface-border bg-surface-light focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -133,6 +151,18 @@ const Header = () => {
                         <div>
                           <span className="font-semibold text-sm block">My Orders</span>
                           <span className="text-[11px] text-txt-placeholder">Track, return, or re-order</span>
+                        </div>
+                      </Link>
+
+                      <Link
+                        to="/blood-test-bookings"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-txt-body hover:bg-surface-light transition-all group"
+                      >
+                        <Activity className="w-5 h-5 text-txt-placeholder group-hover:text-medical-error transition-colors" />
+                        <div>
+                          <span className="font-semibold text-sm block">Blood Bookings</span>
+                          <span className="text-[11px] text-txt-placeholder">View diagnostic reports</span>
                         </div>
                       </Link>
 
@@ -229,6 +259,9 @@ const Header = () => {
           <Link to="/products" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
             Browse Medicines
           </Link>
+          <Link to="/blood-tests" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
+            Blood Tests
+          </Link>
           <Link to="/cart" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
             Cart {cartItemCount > 0 && <span className="ml-auto bg-medical-error text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartItemCount}</span>}
           </Link>
@@ -240,6 +273,9 @@ const Header = () => {
               </Link>
               <Link to="/orders" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
                 <Package className="w-5 h-5 text-txt-placeholder" /> My Orders
+              </Link>
+              <Link to="/blood-test-bookings" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
+                <Activity className="w-5 h-5 text-txt-placeholder" /> Blood Bookings
               </Link>
               <Link to="/wishlist" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg text-txt-dark font-semibold hover:bg-surface-light transition-colors">
                 <Heart className="w-5 h-5 text-txt-placeholder" /> Wishlist

@@ -9,7 +9,7 @@ import {
   CheckCircle2, XCircle, Truck, DollarSign, Phone,
   TrendingUp, ShieldCheck, RefreshCw, Trash2, Star,
   ChevronRight, Box, UserCheck, UserX, ClipboardList,
-  Percent, CreditCard, Gift, Save, AlertCircle, Eye
+  Percent, CreditCard, Gift, Save, AlertCircle, Eye, Droplet
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase, isMockMode } from '../lib/supabase';
@@ -100,6 +100,9 @@ const AdminDashboard = () => {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Fallback to mock data on error/timeout
+      const { mockProducts } = await import('../lib/mockData');
+      setProducts(mockProducts);
     }
   };
 
@@ -349,6 +352,8 @@ const AdminDashboard = () => {
     { id: 'orders', label: 'Orders', icon: ShoppingBag, count: orders.length },
     { id: 'catalog', label: 'Catalog', icon: Package, count: products.length },
     { id: 'users', label: 'Users', icon: Users, count: users.length },
+    { id: 'blood-tests', label: 'Blood Tests', icon: Droplet, path: '/admin/blood-tests' },
+    { id: 'test-bookings', label: 'Test Bookings', icon: ClipboardList, path: '/admin/test-bookings' },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -417,14 +422,18 @@ const AdminDashboard = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSidebarOpen(false);
-                  }}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 group ${isActive
                     ? 'bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-brand-primary/25'
                     : 'text-txt-secondary hover:bg-surface-bg hover:text-txt-dark'
                     }`}
+                  onClick={() => {
+                    if (item.path) {
+                      navigate(item.path);
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                    setSidebarOpen(false);
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-txt-placeholder group-hover:text-brand-primary'} transition-colors`} />
@@ -556,6 +565,8 @@ const AdminDashboard = () => {
                     {[
                       { label: 'View Orders', icon: ShoppingBag, tab: 'orders', color: 'text-brand-primary', bg: 'bg-brand-primary/5 hover:bg-brand-primary/10' },
                       { label: 'Add Product', icon: PlusCircle, tab: 'catalog', color: 'text-medical-success', bg: 'bg-medical-success/5 hover:bg-medical-success/10' },
+                      { label: 'Manage Lab Tests', icon: Droplet, path: '/admin/blood-tests', color: 'text-medical-error', bg: 'bg-medical-error/5 hover:bg-medical-error/10' },
+                      { label: 'Test Bookings', icon: ClipboardList, path: '/admin/test-bookings', color: 'text-blue-500', bg: 'bg-blue-500/5 hover:bg-blue-500/10' },
                       { label: 'Manage Users', icon: Users, tab: 'users', color: 'text-purple-500', bg: 'bg-purple-500/5 hover:bg-purple-500/10' },
                       { label: 'Settings', icon: Settings, tab: 'settings', color: 'text-medical-warning', bg: 'bg-medical-warning/5 hover:bg-medical-warning/10' },
                     ].map(action => {
@@ -563,7 +574,7 @@ const AdminDashboard = () => {
                       return (
                         <button
                           key={action.label}
-                          onClick={() => setActiveTab(action.tab)}
+                          onClick={() => action.path ? navigate(action.path) : setActiveTab(action.tab)}
                           className={`flex items-center gap-3 p-4 rounded-2xl ${action.bg} border border-transparent hover:border-surface-border transition-all duration-200 group`}
                         >
                           <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center`}>

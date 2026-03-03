@@ -18,7 +18,7 @@ const Home = () => {
     const fetchHomeData = async () => {
       try {
         let data;
-        
+
         if (isMockMode) {
           console.log('Using mock data for Home');
           // Simulate network delay
@@ -29,24 +29,24 @@ const Home = () => {
             .from('products')
             .select('*')
             .limit(20);
-          
+
           if (error) throw error;
           data = supabaseData;
         }
 
         const mappedProducts = data.map(p => ({
-            id: p.id,
-            name: p.name,
-            genericName: p.generic_name,
-            brand: p.brand,
-            manufacturer: p.manufacturer?.name || 'Unknown',
-            category: p.category,
-            packSizes: p.pack_sizes || [], // Pass raw pack_sizes for ProductCard
-            stock: p.stock,
-            requiresPrescription: p.prescription_required,
-            image: p.images?.[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400",
-            featured: p.featured,
-            description: p.description
+          id: p.id,
+          name: p.name,
+          genericName: p.generic_name,
+          brand: p.brand,
+          manufacturer: p.manufacturer || { name: 'Unknown' },
+          category: p.category,
+          packSizes: p.pack_sizes || [], // Pass raw pack_sizes for ProductCard
+          stock: p.stock,
+          requiresPrescription: p.prescription_required,
+          image: p.images?.[0] || "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400",
+          featured: p.featured,
+          description: p.description
         }));
 
         setFeaturedMedicines(mappedProducts.filter(m => m.featured).slice(0, 8));
@@ -74,7 +74,7 @@ const Home = () => {
 
       {/* Stock Alerts - Predictive AI */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-         <StockAlerts />
+        <StockAlerts />
       </div>
 
       {/* Trust Benefits Bar */}

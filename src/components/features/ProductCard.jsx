@@ -51,13 +51,12 @@ const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
         )}
       </div>
 
-      <button 
+      <button
         onClick={onToggleWishlist}
-        className={`absolute top-3 right-3 z-20 p-2.5 rounded-full bg-white hover:text-medical-error hover:bg-red-50 transition-all shadow-md duration-300 ${
-          isWishlisted 
-            ? 'text-medical-error opacity-100 translate-y-0' 
+        className={`absolute top-3 right-3 z-20 p-2.5 rounded-full bg-white hover:text-medical-error hover:bg-red-50 transition-all shadow-md duration-300 ${isWishlisted
+            ? 'text-medical-error opacity-100 translate-y-0'
             : 'text-txt-secondary opacity-0 group-hover:opacity-100 translate-y-[-10px] group-hover:translate-y-0'
-        }`}
+          }`}
       >
         <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-medical-error' : ''}`} />
       </button>
@@ -82,7 +81,7 @@ const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
           <div className="mb-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-brand-primary mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-              {product.manufacturer.name}
+              {product.manufacturer?.name || 'Unknown'}
             </p>
             <h3 className="font-bold text-txt-dark text-lg leading-tight line-clamp-2 group-hover:text-brand-primary transition-colors">
               {product.name}
