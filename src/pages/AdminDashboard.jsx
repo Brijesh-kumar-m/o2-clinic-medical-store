@@ -266,18 +266,27 @@ const AdminDashboard = () => {
         return;
       }
 
-      const { error } = await supabase
+      console.log(`[Admin] Updating user ${id} → status: ${newStatus}`);
+
+      const { error, data } = await supabase
         .from('profiles')
         .update({ status: newStatus })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Admin] Supabase RLS error:', error.code, error.message, error.details);
+        throw error;
+      }
 
-      setUsers(users.map(u => u.id === id ? { ...u, status: newStatus } : u));
-      toast.success(`User marked as ${newStatus}`);
+      console.log('[Admin] Update successful:', data);
+
+      // Re-fetch fresh data from DB to confirm persistence
+      await fetchUsers();
+      toast.success(`User ${newStatus === 'approved' ? '✅ Approved' : '❌ Rejected'} successfully`);
     } catch (error) {
       console.error('Error updating user status:', error);
-      toast.error('Failed to update user status');
+      toast.error(`Failed: ${error.message || 'RLS policy may be blocking this action'}`);
     }
   };
 
