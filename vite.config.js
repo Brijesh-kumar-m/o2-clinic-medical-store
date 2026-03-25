@@ -10,24 +10,100 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      devOptions: {
+        enabled: false, // Don't activate SW in dev (avoid stale caching during development)
+      },
+      includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
-        name: 'MediTrust B2B',
-        short_name: 'MediTrust',
-        description: 'B2B Medical Store Application',
-        theme_color: '#0EA5E9',
+        name: 'O2Clinic — B2B Medical Store',
+        short_name: 'O2Clinic',
+        description: 'Wholesale medical supply ordering platform for healthcare professionals',
+        theme_color: '#0284C7',
+        background_color: '#F8FAFC',
+        display: 'standalone',
+        orientation: 'portrait-primary',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
             src: 'favicon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: 'favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'maskable'
           }
         ],
-        background_color: '#FFFFFF',
-        display: 'standalone',
-        orientation: 'portrait-primary'
-      }
+        categories: ['medical', 'shopping', 'business'],
+        shortcuts: [
+          {
+            name: 'Browse Medicines',
+            short_name: 'Catalog',
+            description: 'Browse the medicine catalog',
+            url: '/products',
+            icons: [{ src: 'favicon.svg', sizes: 'any' }]
+          },
+          {
+            name: 'My Orders',
+            short_name: 'Orders',
+            description: 'View your order history',
+            url: '/orders',
+            icons: [{ src: 'favicon.svg', sizes: 'any' }]
+          }
+        ]
+      },
+      workbox: {
+        // Cache static assets aggressively
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Runtime caching for dynamic data
+        runtimeCaching: [
+          {
+            // Cache Google Fonts
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }, // 1 year
+            },
+          },
+          {
+            // Cache Supabase API responses (short-lived)
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 5 }, // 5 minutes
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            // Cache product images (Unsplash + external)
+            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'product-images',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 }, // 30 days
+            },
+          },
+        ],
+      },
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Manual chunk splitting for better caching
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['framer-motion', 'lucide-react'],
+          supabase: ['@supabase/supabase-js'],
+          state: ['zustand'],
+        },
+      },
+    },
+  },
 })

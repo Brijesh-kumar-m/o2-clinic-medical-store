@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCartStore } from '../store/useCartStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -29,6 +29,7 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [wishlistIds, setWishlistIds] = useState(new Set());
+  const MotionDiv = motion.div;
 
   useEffect(() => {
     if (user) {
@@ -434,7 +435,7 @@ const ProductDetail = () => {
               {tab.icon}
               {tab.label}
               {activeTab === tab.id && (
-                <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary rounded-full" />
+                <MotionDiv layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary rounded-full" />
               )}
             </button>
           ))}

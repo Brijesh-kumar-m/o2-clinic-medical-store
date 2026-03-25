@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from '../lib/supabase';
+import { supabase, isMockMode } from '../lib/supabase';
+
 
 export const useCartStore = create(
   persist(
@@ -44,7 +45,7 @@ export const useCartStore = create(
               selectedPackSize: item.pack_size,
             };
           }).filter(Boolean);
-          
+
           set({ items: mappedItems });
         } catch (error) {
           console.error('Error in fetchCart:', error);
@@ -73,38 +74,38 @@ export const useCartStore = create(
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             if (existingItemIndex > -1) {
-               const item = newItems[existingItemIndex];
-               await supabase
-                 .from('cart_items')
-                 .update({ quantity: item.quantity })
-                 .eq('user_id', user.id)
-                 .eq('product_id', product.id)
-                 .eq('pack_size', packSize);
+              const item = newItems[existingItemIndex];
+              await supabase
+                .from('cart_items')
+                .update({ quantity: item.quantity })
+                .eq('user_id', user.id)
+                .eq('product_id', product.id)
+                .eq('pack_size', packSize);
             } else {
-               // Check if item exists in DB (in case local state was out of sync)
-               const { data: existingDbItem } = await supabase
-                 .from('cart_items')
-                 .select('id, quantity')
-                 .eq('user_id', user.id)
-                 .eq('product_id', product.id)
-                 .eq('pack_size', packSize)
-                 .single();
+              // Check if item exists in DB (in case local state was out of sync)
+              const { data: existingDbItem } = await supabase
+                .from('cart_items')
+                .select('id, quantity')
+                .eq('user_id', user.id)
+                .eq('product_id', product.id)
+                .eq('pack_size', packSize)
+                .single();
 
-               if (existingDbItem) {
-                 await supabase
-                   .from('cart_items')
-                   .update({ quantity: existingDbItem.quantity + quantity })
-                   .eq('id', existingDbItem.id);
-               } else {
-                 await supabase
-                   .from('cart_items')
-                   .insert({
-                     user_id: user.id,
-                     product_id: product.id,
-                     quantity: quantity,
-                     pack_size: packSize
-                   });
-               }
+              if (existingDbItem) {
+                await supabase
+                  .from('cart_items')
+                  .update({ quantity: existingDbItem.quantity + quantity })
+                  .eq('id', existingDbItem.id);
+              } else {
+                await supabase
+                  .from('cart_items')
+                  .insert({
+                    user_id: user.id,
+                    product_id: product.id,
+                    quantity: quantity,
+                    pack_size: packSize
+                  });
+              }
             }
           }
         } catch (err) {
@@ -132,13 +133,13 @@ export const useCartStore = create(
               .eq('pack_size', packSize);
           }
         } catch (err) {
-           console.error("Failed to remove cart item from Supabase", err);
+          console.error("Failed to remove cart item from Supabase", err);
         }
       },
 
       updateQuantity: async (productId, packSize, quantity) => {
         const safeQuantity = Math.max(1, quantity);
-        
+
         // Optimistic
         const newItems = get().items.map((item) =>
           item.id === productId && item.selectedPackSize === packSize
@@ -165,23 +166,23 @@ export const useCartStore = create(
 
       clearCart: async () => {
         set({ items: [] });
-        
+
         if (isMockMode) return;
 
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-             await supabase.from('cart_items').delete().eq('user_id', user.id);
+            await supabase.from('cart_items').delete().eq('user_id', user.id);
           }
         } catch (err) {
-           console.error("Failed to clear cart in Supabase", err);
+          console.error("Failed to clear cart in Supabase", err);
         }
       },
 
       resetCart: () => set({ items: [] }),
 
       getTotalItems: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
-      
+
       getSubtotal: () => get().items.reduce((acc, item) => {
         const pack = item.packSizes?.find(p => p.size === item.selectedPackSize);
         return acc + (pack ? pack.price * item.quantity : 0);

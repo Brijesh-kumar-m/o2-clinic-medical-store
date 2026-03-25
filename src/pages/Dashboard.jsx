@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -9,7 +9,7 @@ import {
   TrendingUp, Clock, AlertCircle, ShieldCheck
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, isMockMode } from '../lib/supabase';
 import ProfileEditModal from '../components/features/ProfileEditModal';
 
 const Dashboard = () => {
@@ -25,36 +25,38 @@ const Dashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch Orders
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (id)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      let orders = [];
 
-      if (error) throw error;
+      if (isMockMode) {
+        // Simulate a network delay and return demo data
+        await new Promise(resolve => setTimeout(resolve, 600));
+        orders = [
+          { id: 'ORD-DEMO-001', created_at: new Date().toISOString(), total_amount: 4200, status: 'pending', order_items: [{ id: 1 }, { id: 2 }] },
+          { id: 'ORD-DEMO-002', created_at: new Date(Date.now() - 86400000).toISOString(), total_amount: 8750, status: 'delivered', order_items: [{ id: 3 }] },
+          { id: 'ORD-DEMO-003', created_at: new Date(Date.now() - 86400000 * 3).toISOString(), total_amount: 2300, status: 'delivered', order_items: [{ id: 4 }, { id: 5 }, { id: 6 }] },
+        ];
+      } else {
+        // Real Supabase fetch
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, order_items (id)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) throw error;
+        orders = data || [];
+      }
 
       // Calculate stats
       const today = new Date().toDateString();
       const todaysOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
       const purchasedToday = todaysOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
       const activeOrdersCount = orders.filter(o => ['pending', 'processing', 'shipped'].includes(o.status)).length;
-      
-      // Estimate savings (assuming ~20% discount on MRP)
-      const estimatedSavings = orders.reduce((sum, o) => sum + (Number(o.total_amount) * 0.25), 0);
+      const estimatedSavings = orders.reduce((sum, o) => sum + (Number(o.total_amount) * 0.2), 0);
 
       setStats(prev => ({
         ...prev,
@@ -63,12 +65,11 @@ const Dashboard = () => {
         totalSaved: Math.round(estimatedSavings)
       }));
 
-      // Map recent orders
       const mappedOrders = orders.map(order => ({
         id: order.id,
         date: new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
         items: order.order_items?.length || 0,
-        total: `₹${order.total_amount}`,
+        total: `₹${Number(order.total_amount).toLocaleString()}`,
         status: order.status.charAt(0).toUpperCase() + order.status.slice(1)
       }));
 
@@ -79,7 +80,23 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+    }
+  }, [user, fetchDashboardData]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+      </div>
+    );
+  }
 
   const statCards = [
     { label: 'Purchased Today', value: `₹${stats.purchasedToday.toLocaleString()}`, icon: TrendingUp, color: 'text-medical-success' },
@@ -230,12 +247,12 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
-      
+
       {/* Profile Edit Modal */}
       {isEditProfileOpen && (
-        <ProfileEditModal 
-          isOpen={isEditProfileOpen} 
-          onClose={() => setIsEditProfileOpen(false)} 
+        <ProfileEditModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
         />
       )}
     </div>

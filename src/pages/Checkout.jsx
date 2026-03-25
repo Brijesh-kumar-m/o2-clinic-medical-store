@@ -14,12 +14,17 @@ import { toast } from 'react-hot-toast';
 import { supabase, isMockMode } from '../lib/supabase';
 
 const steps = ['Cart', 'Address', 'Prescription', 'Payment', 'Confirm'];
+const ADDRESS_PRESETS = [
+  '123 Medical Street, Opp City Hospital, Mumbai, MH 400001',
+  'Unit 45, Pharma SEZ, Thane West, Mumbai, MH 400601',
+];
 
 const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const { items, getSubtotal, clearCart } = useCartStore();
   const { user, profile } = useAuthStore();
   const { gstRate, shippingCharge, freeShippingThreshold, fetchSettings } = useSettingsStore();
+  const MotionDiv = motion.div;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [address, setAddress] = useState(profile?.address || profile?.practice_address || "");
@@ -250,7 +255,7 @@ const Checkout = () => {
       </div>
 
       {/* Step Content */}
-      <motion.div
+      <MotionDiv
         key={currentStep}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -258,7 +263,7 @@ const Checkout = () => {
         className="min-h-[350px]"
       >
         {renderStep()}
-      </motion.div>
+      </MotionDiv>
 
       {/* Navigation Buttons */}
       <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4 border-t border-surface-border pt-6">
@@ -337,14 +342,16 @@ const ReviewCart = ({ items, subtotal, tax, shipping, total, gstRate }) => (
 
 const AddressForm = ({ setAddress, address, phone, setPhone }) => {
   const [selected, setSelected] = useState(0);
-  const addresses = [
-      "123 Medical Street, Opp City Hospital, Mumbai, MH 400001",
-      "Unit 45, Pharma SEZ, Thane West, Mumbai, MH 400601"
-  ];
+
+  // Keep the selected address card in sync with the incoming `address` prop.
+  React.useEffect(() => {
+    const idx = ADDRESS_PRESETS.indexOf(address);
+    if (idx !== -1) setSelected(idx);
+  }, [address]);
 
   const handleSelect = (idx) => {
       setSelected(idx);
-      setAddress(addresses[idx]);
+    setAddress(ADDRESS_PRESETS[idx]);
   };
 
   return (
@@ -360,7 +367,7 @@ const AddressForm = ({ setAddress, address, phone, setPhone }) => {
           <Home className={`shrink-0 mt-0.5 ${selected === 0 ? 'text-brand-primary' : 'text-txt-placeholder'}`} />
           <div>
             <p className="font-bold text-txt-dark">Clinic Primary</p>
-            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{addresses[0]}</p>
+            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{ADDRESS_PRESETS[0]}</p>
             {selected === 0 && <Badge className="mt-2 bg-brand-primary/10 text-brand-primary border-none text-xs">Selected</Badge>}
           </div>
         </button>
@@ -372,7 +379,7 @@ const AddressForm = ({ setAddress, address, phone, setPhone }) => {
           <Package className={`shrink-0 mt-0.5 ${selected === 1 ? 'text-brand-primary' : 'text-txt-placeholder'}`} />
           <div>
             <p className="font-bold text-txt-dark">Warehouse B</p>
-            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{addresses[1]}</p>
+            <p className="text-sm text-txt-secondary leading-relaxed mt-1">{ADDRESS_PRESETS[1]}</p>
             {selected === 1 && <Badge className="mt-2 bg-brand-primary/10 text-brand-primary border-none text-xs">Selected</Badge>}
           </div>
         </button>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Hero, CategoryStrip } from '../components/layout/Hero';
 import { supabase, isMockMode } from '../lib/supabase';
 import { mockProducts } from '../lib/mockData';
@@ -51,6 +51,8 @@ const Home = () => {
 
         setFeaturedMedicines(mappedProducts.filter(m => m.featured).slice(0, 8));
         setDeals(mappedProducts.filter(m => (m.packSizes?.[0]?.discount || 0) > 5).slice(0, 4));
+        console.log('Featured Medicines:', mappedProducts.filter(m => m.featured).slice(0, 8));
+        console.log('Deals:', mappedProducts.filter(m => (m.packSizes?.[0]?.discount || 0) > 5).slice(0, 4));
       } catch (error) {
         console.error('Error fetching home data:', error);
         // Do not show toast for connection errors on Home to keep it clean, but maybe show a banner in UI
@@ -61,6 +63,14 @@ const Home = () => {
 
     fetchHomeData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-surface-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-0 w-full overflow-hidden">

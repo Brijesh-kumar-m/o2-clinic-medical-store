@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, isMockMode } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
@@ -14,14 +14,9 @@ const Orders = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const MotionDiv = motion.div;
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [user]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       let data;
       
@@ -93,7 +88,23 @@ const Orders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    } else {
+      setLoading(false);
+    }
+  }, [user, fetchOrders]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
+      </div>
+    );
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -189,7 +200,7 @@ const Orders = () => {
       <div className="space-y-4">
         {filteredOrders.length > 0 ? (
           filteredOrders.map((order, index) => (
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -266,7 +277,7 @@ const Orders = () => {
                   </div>
                 )}
               </Card>
-            </motion.div>
+            </MotionDiv>
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl border border-dashed border-surface-border">

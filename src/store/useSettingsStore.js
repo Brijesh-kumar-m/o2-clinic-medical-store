@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { supabase, isMockMode } from '../lib/supabase';
 
-export const useSettingsStore = create((set, get) => ({
+export const useSettingsStore = create((set) => ({
   gstRate: 12.0,
   shippingCharge: 150.0,
   freeShippingThreshold: 5000.0,

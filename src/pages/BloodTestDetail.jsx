@@ -44,10 +44,16 @@ const BloodTestDetail = () => {
           await new Promise(resolve => setTimeout(resolve, 800));
           // Mock tests map
           const mockTests = {
-            'bt-1': { id: 'bt-1', test_name: 'Complete Blood Count (CBC)', category: 'General', price: 499, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics', description: 'Comprehensive blood test to measure your overall health and detect various disorders like anemia and infection.' },
-            'bt-2': { id: 'bt-2', test_name: 'Lipid Profile', category: 'Heart', price: 899, preparation: '9-12 hours fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics', description: 'Evaluates the level of cholesterol and fats in your blood to assess your risk for heart disease.' },
-            'bt-3': { id: 'bt-3', test_name: 'Thyroid Profile (T3, T4, TSH)', category: 'Hormonal', price: 750, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics', description: 'Assesses the function of your thyroid gland by measuring hormone levels.' },
-            'bt-4': { id: 'bt-4', test_name: 'Diabetes Screen (HbA1c)', category: 'Diabetes', price: 550, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics', description: 'Measures your average blood sugar levels over the past 2-3 months.' }
+            'bt-1': { id: 'bt-1', test_name: 'Complete Blood Count (CBC)', category: 'General', price: 399, mrp: 499, discount: 20, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-2': { id: 'bt-2', test_name: 'Lipid Profile', category: 'Heart', price: 699, mrp: 899, discount: 22, preparation: '9–12 hours fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-3': { id: 'bt-3', test_name: 'Thyroid Profile (T3, T4, TSH)', category: 'Hormonal', price: 750, mrp: null, discount: 0, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-4': { id: 'bt-4', test_name: 'Diabetes Screen (HbA1c)', category: 'Diabetes', price: 449, mrp: 550, discount: 18, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-5': { id: 'bt-5', test_name: 'Liver Function Test (LFT)', category: 'General', price: 950, mrp: null, discount: 0, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-6': { id: 'bt-6', test_name: 'Kidney Function Test (KFT)', category: 'General', price: 699, mrp: 850, discount: 18, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-7': { id: 'bt-7', test_name: 'Vitamin D (25-OH)', category: 'Supplements', price: 999, mrp: 1250, discount: 20, preparation: 'No fasting required', sample_type: 'Blood', report_time: '48 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-8': { id: 'bt-8', test_name: 'Iron Profile', category: 'General', price: 799, mrp: null, discount: 0, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-9': { id: 'bt-9', test_name: 'Urine Routine & Microscopy', category: 'General', price: 199, mrp: 299, discount: 33, preparation: 'Morning sample preferred', sample_type: 'Urine', report_time: '12 Hours', lab_name: 'MediTrust Diagnostics' },
+            'bt-10': { id: 'bt-10', test_name: 'Vitamin B12', category: 'Supplements', price: 649, mrp: 799, discount: 19, preparation: 'No fasting required', sample_type: 'Blood', report_time: '24 Hours', lab_name: 'MediTrust Diagnostics' }
           };
           setTest(mockTests[id] || mockTests['bt-1']);
           return;

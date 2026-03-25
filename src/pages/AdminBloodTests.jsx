@@ -105,6 +105,7 @@ const AdminBloodTests = () => {
       toast.success('Test deleted');
       fetchTests();
     } catch (error) {
+      console.error('Error deleting blood test:', error);
       toast.error('Failed to delete test');
     }
   };

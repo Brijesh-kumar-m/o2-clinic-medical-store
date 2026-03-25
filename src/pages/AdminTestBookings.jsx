@@ -103,6 +103,7 @@ const AdminTestBookings = () => {
       toast.success('Report URL saved successfully');
       setSelectedBooking(null);
     } catch (error) {
+      console.error('Error saving report URL:', error);
       toast.error('Failed to save report URL');
     } finally {
       setUpdatingId(null);
@@ -187,6 +188,11 @@ const AdminTestBookings = () => {
         </header>
 
         <div className="p-8 space-y-8">
+          {loading && bookings.length === 0 && (
+            <div className="flex items-center justify-center py-12 text-txt-secondary font-bold">
+              Loading test bookings...
+            </div>
+          )}
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="p-6 bg-gradient-to-br from-medical-error to-red-600 text-white rounded-[2rem] shadow-xl shadow-red-500/15">

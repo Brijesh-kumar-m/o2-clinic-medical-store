@@ -27,12 +27,19 @@ const ProfileEditModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    const success = await updateProfile(formData);
-    
-    setLoading(false);
-    if (success) {
-      onClose();
+    try {
+      const success = await updateProfile(formData);
+      if (success) {
+        toast.success('Profile updated successfully');
+        onClose();
+      } else {
+        toast.error('Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Profile update failed:', err);
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
     }
   };
 

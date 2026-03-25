@@ -78,6 +78,14 @@ const BloodTestBookings = () => {
     return true;
   });
 
+  const handleDownloadReport = (reportUrl) => {
+    if (!reportUrl || reportUrl === '#') {
+      toast.error('Report URL not available yet.');
+      return;
+    }
+    window.open(reportUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
       {/* Header */}
@@ -169,7 +177,10 @@ const BloodTestBookings = () => {
                     <div className="lg:w-64 space-y-4 relative z-10">
                       <p className="text-3xl font-black text-txt-dark text-right lg:text-left mb-6">₹{(booking.blood_tests?.price || 0)}</p>
                       {booking.status === 'result_ready' ? (
-                        <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-medical-success to-emerald-600 shadow-xl shadow-medical-success/20 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:-translate-y-1 transition-transform group/btn">
+                        <Button
+                          onClick={() => handleDownloadReport(booking.report_url)}
+                          className="w-full h-14 rounded-2xl bg-gradient-to-r from-medical-success to-emerald-600 shadow-xl shadow-medical-success/20 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:-translate-y-1 transition-transform group/btn"
+                        >
                           <Download size={18} className="group-hover/btn:scale-110 transition-transform" /> Download Report
                         </Button>
                       ) : (

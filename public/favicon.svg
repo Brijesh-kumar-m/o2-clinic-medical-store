@@ -11,16 +11,16 @@
   </defs>
 
   <g filter="url(#glow)">
-    {/* Atom 1 */}
+    <!-- Atom 1 -->
     <circle cx="35" cy="50" r="25" stroke="#0284C7" stroke-width="6" fill="url(#o2-gradient)" fill-opacity="0.1" />
-    {/* Atom 2 */}
+    <!-- Atom 2 -->
     <circle cx="65" cy="50" r="25" stroke="#0D9488" stroke-width="6" fill="url(#o2-gradient)" fill-opacity="0.1" />
 
-    {/* Double Bond connection */}
+    <!-- Double Bond connection -->
     <path d="M45 42 H55" stroke="white" stroke-width="3" stroke-linecap="round" />
     <path d="M45 58 H55" stroke="white" stroke-width="3" stroke-linecap="round" />
 
-    {/* Floating Electrons / Zen Orbits */}
+    <!-- Orbits -->
     <ellipse cx="50" cy="50" rx="42" ry="15" stroke="#0284C7" stroke-width="1" stroke-opacity="0.5" transform="rotate(-15 50 50)" />
     <ellipse cx="50" cy="50" rx="42" ry="15" stroke="#0D9488" stroke-width="1" stroke-opacity="0.5" transform="rotate(15 50 50)" />
   </g>

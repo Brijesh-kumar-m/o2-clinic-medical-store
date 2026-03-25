@@ -5,6 +5,7 @@ import { supabase, isMockMode } from '../../lib/supabase';
 
 const StockAlerts = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
+  const MotionDiv = motion.div;
 
   useEffect(() => {
     const fetchLowStockItems = async () => {
@@ -78,7 +79,7 @@ const StockAlerts = () => {
                 </div>
               </div>
               <div className="relative h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <motion.div
+              <MotionDiv
                   initial={{ width: 0 }}
                   animate={{ width: `${item.percentage}%` }}
                   transition={{ duration: 1.5, delay: idx * 0.2 }}
@@ -97,7 +98,7 @@ const StockAlerts = () => {
         </div>
 
         {/* Floating Stat Chip */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 1 }}
@@ -112,7 +113,7 @@ const StockAlerts = () => {
               <p className="text-sm font-black text-txt-dark">₹12,450 / mo</p>
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
     </div>
   );

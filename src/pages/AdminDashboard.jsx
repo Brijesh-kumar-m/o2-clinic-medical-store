@@ -56,7 +56,7 @@ const AdminDashboard = () => {
     fetchUsers();
     fetchProducts();
     fetchAppSettings();
-  }, []);
+  }, [fetchAppSettings]);
 
   useEffect(() => {
     setSettingsForm({
