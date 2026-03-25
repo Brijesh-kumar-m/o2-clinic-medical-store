@@ -6,11 +6,11 @@ import { Link } from 'react-router-dom';
 import { Clock, Beaker, Shield, ChevronRight, Activity, Tag, Zap, Star } from 'lucide-react';
 
 const BloodTestCard = ({ test }) => {
-  const hasDiscount = test.discount && test.discount > 0;
-  const mrp = test.mrp || (hasDiscount ? Math.round(test.price / (1 - test.discount / 100)) : null);
-  const discountedPrice = hasDiscount ? test.price : test.price;
+  const discount = Number(test.discount) || 0;
+  const hasDiscount = discount > 0;
+  const mrp = hasDiscount ? (test.mrp || Math.round(test.price / (1 - discount / 100))) : null;
   const isFeatured = test.featured;
-  const isHotDeal = hasDiscount && test.discount >= 20;
+  const isHotDeal = hasDiscount && discount >= 20;
 
   return (
     <Card className="group relative flex flex-col h-full overflow-hidden border border-slate-100 bg-white hover:border-medical-error/30 hover:shadow-2xl hover:shadow-red-500/8 transition-all duration-500 ease-out rounded-3xl">
@@ -71,7 +71,7 @@ const BloodTestCard = ({ test }) => {
           <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
             <Tag className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             <span className="text-[11px] font-black text-emerald-700 tracking-tight">
-              Save ₹{mrp - discountedPrice} on this test!
+              Save ₹{mrp - test.price} on this test!
             </span>
           </div>
         )}
@@ -108,21 +108,21 @@ const BloodTestCard = ({ test }) => {
         <div className="flex items-end justify-between gap-2">
           {/* Pricing */}
           <div>
-            {/* Discount Badge */}
+            {/* Discount Badge — only shown when discount > 0 */}
             {hasDiscount && (
               <span className="inline-block bg-red-100 text-medical-error text-[10px] font-black px-2 py-0.5 rounded-md mb-1 tracking-tight">
-                {test.discount}% OFF
+                {discount}% OFF
               </span>
             )}
-            {/* MRP Strikethrough */}
+            {/* MRP Strikethrough — only shown when discount > 0 and mrp exists */}
             {hasDiscount && mrp && (
               <p className="text-[11px] text-txt-placeholder line-through leading-none mb-0.5 font-semibold">
-                ₹{mrp.toLocaleString('en-IN')}
+                ₹{Number(mrp).toLocaleString('en-IN')}
               </p>
             )}
             {/* Final Price */}
             <p className="text-xl font-black text-txt-dark leading-none">
-              ₹{discountedPrice.toLocaleString('en-IN')}
+              ₹{Number(test.price).toLocaleString('en-IN')}
             </p>
           </div>
 

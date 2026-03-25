@@ -110,10 +110,10 @@ const Dashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-xl mb-2xl">
         <div>
           <h1 className="text-3xl font-black text-txt-dark mb-1">Welcome, Dr. {profile?.last_name || 'User'}</h1>
-          <p className="text-txt-secondary font-medium flex items-center gap-2">
+          <div className="text-txt-secondary font-medium flex items-center gap-2">
             <Badge variant="success" className="h-2 w-2 p-0 animate-pulse"></Badge>
             Practice ID: {user?.id?.slice(0, 8)} • {profile?.practice_name || 'Medical Store'}
-          </p>
+          </div>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="rounded-xl border-2" onClick={() => setIsEditProfileOpen(true)}>

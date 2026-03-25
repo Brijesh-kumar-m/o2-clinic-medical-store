@@ -231,12 +231,12 @@ const Orders = () => {
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full md:w-auto">
                     <div className="text-left md:text-right">
-                      <p className="text-xs text-txt-secondary uppercase tracking-wider font-bold mb-1">Total Amount</p>
-                      <p className="text-lg font-bold text-txt-dark">₹{order.total.toLocaleString()}</p>
+                      <span className="block text-xs text-txt-secondary uppercase tracking-wider font-bold mb-1">Total Amount</span>
+                      <span className="block text-lg font-bold text-txt-dark">₹{order.total.toLocaleString()}</span>
                     </div>
 
                     <div className="text-left md:text-right">
-                      <p className="text-xs text-txt-secondary uppercase tracking-wider font-bold mb-1">Status</p>
+                      <span className="block text-xs text-txt-secondary uppercase tracking-wider font-bold mb-1">Status</span>
                       <Badge variant={getStatusColor(order.status)} className="flex items-center gap-1.5 pl-1.5 pr-2.5">
                         {getStatusIcon(order.status)}
                         {order.status}
