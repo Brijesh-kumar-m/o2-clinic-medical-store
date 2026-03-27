@@ -155,7 +155,7 @@ const BloodTestDetail = () => {
                   NABL Certified
                 </Badge>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-black text-txt-dark mb-6 leading-tight tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-txt-dark mb-6 leading-tight tracking-tight">
                 {test.test_name}
               </h1>
               <p className="text-lg text-txt-secondary leading-relaxed w-full font-medium">
@@ -164,7 +164,7 @@ const BloodTestDetail = () => {
             </div>
 
             <div className="w-full lg:w-[35%]">
-              <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 min-w-[320px]">
+              <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 w-full sm:min-w-[320px]">
                 <p className="text-[11px] font-black text-txt-placeholder uppercase tracking-[0.2em] mb-2 text-center">Exclusive B2B Price</p>
                 <div className="flex justify-center items-baseline gap-2 mb-6">
                   <span className="text-5xl font-black text-txt-dark">₹{test.price}</span>

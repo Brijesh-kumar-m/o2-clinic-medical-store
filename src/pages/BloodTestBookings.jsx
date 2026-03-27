@@ -135,7 +135,7 @@ const BloodTestBookings = () => {
                     </div>
 
                     <div className="w-full lg:flex-1 min-w-[280px] space-y-4">
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-4">
                         <h3 className="text-2xl font-black text-txt-dark tracking-tight leading-none group-hover:text-medical-error transition-colors">
                           {booking.blood_tests?.test_name || 'Blood Test'}
                         </h3>
