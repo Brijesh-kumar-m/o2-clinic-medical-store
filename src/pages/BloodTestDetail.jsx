@@ -145,8 +145,8 @@ const BloodTestDetail = () => {
             <span>Back to Tests</span>
           </button>
 
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-12">
-            <div className="flex-1">
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-16">
+            <div className="w-full lg:w-[60%]">
               <div className="flex flex-wrap items-center gap-4 mb-6">
                 <Badge className="bg-medical-error/10 text-medical-error border-medical-error/10 px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-widest">
                   {test.category}
@@ -158,12 +158,12 @@ const BloodTestDetail = () => {
               <h1 className="text-4xl lg:text-5xl font-black text-txt-dark mb-6 leading-tight tracking-tight">
                 {test.test_name}
               </h1>
-              <p className="text-lg text-txt-secondary leading-relaxed max-w-2xl font-medium">
+              <p className="text-lg text-txt-secondary leading-relaxed w-full font-medium">
                 {test.description || 'Professional diagnostic measurement conducted by certified medical lab staff with precision and accuracy.'}
               </p>
             </div>
 
-            <div className="w-full lg:w-auto">
+            <div className="w-full lg:w-[35%]">
               <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 min-w-[320px]">
                 <p className="text-[11px] font-black text-txt-placeholder uppercase tracking-[0.2em] mb-2 text-center">Exclusive B2B Price</p>
                 <div className="flex justify-center items-baseline gap-2 mb-6">
