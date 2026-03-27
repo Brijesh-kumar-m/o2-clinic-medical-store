@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { ArrowRight, ShieldCheck, Truck, Zap, Activity, Search } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Truck, Zap, Activity, Search, Pill, HeartPulse, Droplet, Wind, FlaskConical, Brain, Sparkles, Box } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const Hero = () => {
@@ -149,18 +149,18 @@ const CategoryStrip = () => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          // Map icons based on category name (simple heuristic)
+          // Map icons based on category name
           const getIcon = (name) => {
             const lower = name.toLowerCase();
-            if (lower.includes('antibiotic')) return "💊";
-            if (lower.includes('cardio') || lower.includes('heart')) return "🫀";
-            if (lower.includes('diabet') || lower.includes('sugar')) return "🩸";
-            if (lower.includes('respir') || lower.includes('lung')) return "🫁";
-            if (lower.includes('gastro') || lower.includes('stomach')) return "🧪";
-            if (lower.includes('neuro') || lower.includes('brain')) return "🧠";
-            if (lower.includes('derm') || lower.includes('skin')) return "🧴";
-            if (lower.includes('supplement') || lower.includes('vitamin')) return "⚡";
-            return "📦";
+            if (lower.includes('antibiotic') || lower.includes('pain')) return <Pill className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('cardio') || lower.includes('heart')) return <HeartPulse className="w-6 h-6 text-red-500 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('diabet') || lower.includes('sugar')) return <Droplet className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('respir') || lower.includes('lung')) return <Wind className="w-6 h-6 text-teal-500 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('gastro') || lower.includes('stomach')) return <FlaskConical className="w-6 h-6 text-indigo-500 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('neuro') || lower.includes('brain')) return <Brain className="w-6 h-6 text-purple-500 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('derm') || lower.includes('skin')) return <Sparkles className="w-6 h-6 text-orange-400 group-hover:scale-110 transition-transform" />;
+            if (lower.includes('supplement') || lower.includes('vitamin')) return <Zap className="w-6 h-6 text-amber-500 group-hover:scale-110 transition-transform" />;
+            return <Box className="w-6 h-6 text-slate-400 group-hover:scale-110 transition-transform" />;
           };
 
           const mappedCategories = data.map(item => ({
@@ -185,8 +185,8 @@ const CategoryStrip = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-surface-border p-4">
         <div className="flex items-center justify-between overflow-x-auto whitespace-nowrap gap-4 pb-2 md:pb-0 scrollbar-hide">
           {categories.map((cat, idx) => (
-            <Link key={idx} to={`/products?category=${encodeURIComponent(cat.name)}`} className="flex flex-col items-center justify-center gap-2 min-w-[100px] p-3 rounded-xl hover:bg-surface-bg transition-colors group cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-surface-bg group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-surface-border flex items-center justify-center text-2xl transition-all">
+            <Link key={idx} to={`/products?category=${encodeURIComponent(cat.name)}`} className="flex flex-col items-center justify-center gap-2 min-w-[100px] p-3 rounded-xl hover:bg-white/40 transition-all group cursor-pointer relative overflow-hidden">
+              <div className="w-14 h-14 rounded-2xl bg-white/60 backdrop-blur-md border border-white/40 group-hover:bg-white group-hover:shadow-lg flex items-center justify-center transition-all duration-300">
                 {cat.icon}
               </div>
               <div className="text-center">

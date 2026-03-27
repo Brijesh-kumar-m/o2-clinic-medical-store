@@ -36,7 +36,7 @@ const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
   };
 
   return (
-    <Card className="group relative flex flex-col h-full overflow-hidden border-surface-border bg-white hover:border-brand-primary/50 hover:shadow-xl transition-all duration-300 ease-in-out rounded-2xl">
+    <Card className="group relative flex flex-col h-full overflow-hidden border-surface-border bg-white hover:border-brand-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out rounded-2xl">
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2 pointer-events-none">
         {discount > 0 && (
@@ -113,18 +113,14 @@ const ProductCard = ({ product, isWishlisted, onToggleWishlist }) => {
       </Link>
 
       {/* Button Outside Link */}
-      <div className="px-5 pb-5 mt-auto">
+      <div className="px-5 pb-5 mt-auto pt-2">
         <Button
           onClick={handleAddToCart}
-          className="w-full h-11 rounded-xl shadow-none border-brand-primary/30 text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all duration-300 relative overflow-hidden group/btn font-semibold"
+          className="w-full h-11 rounded-xl shadow-sm text-brand-primary bg-white border border-brand-primary/20 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all duration-300 flex items-center justify-center gap-2 font-bold active:scale-95"
           variant="outline"
         >
-          <span className="flex items-center justify-center gap-2 relative z-10 transition-transform duration-300 group-hover/btn:-translate-y-10">
-            Add to Cart
-          </span>
-          <span className="absolute inset-0 flex items-center justify-center gap-2 translate-y-10 group-hover/btn:translate-y-0 transition-transform duration-300 z-10">
-            <ShoppingCart className="w-4 h-4" /> Add Now
-          </span>
+          <ShoppingCart className="w-4 h-4" /> 
+          <span>Add to Cart</span>
         </Button>
       </div>
     </Card>
