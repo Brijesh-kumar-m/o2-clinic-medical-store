@@ -31,16 +31,16 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className="relative bg-txt-primary text-white mt-12 overflow-hidden">
+      <footer className="relative bg-txt-primary text-white mt-auto overflow-hidden">
         {/* Abstract Background Elements */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-primary/20 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-brand-secondary/20 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10">
 
           {/* Top Section: Newsletter & Brand */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12 items-center">
             <div className="lg:pr-12">
               <Link to="/" className="inline-block mb-6">
                 <Logo variant="white" className="w-14 h-14" />
@@ -151,7 +151,7 @@ const Layout = () => {
             </div>
           </div>
 
-          <div className="border-t border-white/10 my-12"></div>
+          <div className="border-t border-white/10 my-8"></div>
 
           {/* Bottom Section */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">

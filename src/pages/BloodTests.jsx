@@ -249,9 +249,13 @@ const BloodTests = () => {
               <div className="relative p-2 bg-gradient-to-br from-white via-slate-100 to-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/80">
                 <div className="absolute inset-0 bg-gradient-to-br from-red-200/20 to-blue-200/20 opacity-40 blur-2xl" />
                 <img
-                  src="https://images.unsplash.com/photo-1579154235602-4c070188686e?auto=format&fit=crop&q=80&w=800"
+                  src="https://images.unsplash.com/photo-1579154204066-86d1ba52e5cc?auto=format&fit=crop&q=80&w=800"
                   alt="Blood Testing Lab"
-                  className="w-full h-64 lg:h-72 object-cover rounded-[2rem] relative z-10"
+                  className="w-full h-64 lg:h-72 object-cover rounded-[2rem] relative z-10 bg-slate-200"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?auto=format&fit=crop&q=80&w=800'; 
+                  }}
                 />
                 {/* Floating badge on image */}
                 <div className="absolute bottom-6 left-6 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl px-4 py-2.5 border border-slate-100">
