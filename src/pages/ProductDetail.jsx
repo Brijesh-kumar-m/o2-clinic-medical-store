@@ -234,7 +234,7 @@ const ProductDetail = () => {
         <span className="text-txt-dark truncate max-w-[200px]">{product.name}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Left: Gallery */}
         <div className="lg:col-span-6 flex flex-col gap-6 sticky top-24 self-start">
           <div className="aspect-[4/3] bg-white rounded-3xl border border-surface-border p-8 flex items-center justify-center overflow-hidden group shadow-sm relative">
@@ -424,7 +424,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Tabs Section */}
-      <div className="mb-24">
+      <div className="mb-14">
         <div className="flex border-b border-surface-border gap-8 mb-8 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button

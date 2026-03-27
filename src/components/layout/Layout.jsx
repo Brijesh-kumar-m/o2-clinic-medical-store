@@ -27,11 +27,11 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-surface-bg font-sans text-txt-body">
       <Header />
-      <main className="flex-grow pt-12 lg:pt-14"> {/* Further reduced vertical gap */}
+      <main className="flex-grow pt-2 lg:pt-2"> {/* Minimal gap between navbar and content */}
         <Outlet />
       </main>
 
-      <footer className="relative bg-txt-primary text-white mt-24 overflow-hidden">
+      <footer className="relative bg-txt-primary text-white mt-12 overflow-hidden">
         {/* Abstract Background Elements */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-primary/20 rounded-full blur-3xl opacity-20 pointer-events-none"></div>

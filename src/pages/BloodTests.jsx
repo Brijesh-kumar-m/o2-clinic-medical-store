@@ -184,17 +184,17 @@ const BloodTests = () => {
       {/* ══════════════════════════════════════
           HERO SECTION
       ══════════════════════════════════════ */}
-      <div className="relative bg-white pt-14 pb-16 overflow-hidden border-b border-slate-100">
+      <div className="relative bg-white pt-4 pb-16 overflow-hidden border-b border-slate-100">
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-[40%] h-full bg-gradient-to-l from-red-50/60 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-1/4 h-2/3 bg-gradient-to-tr from-blue-50/60 to-transparent pointer-events-none" />
         <div className="absolute top-10 right-[15%] w-64 h-64 rounded-full bg-red-100/30 blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 lg:gap-16">
 
             {/* ── Left Text ── */}
-            <div className="flex-1 max-w-2xl">
+            <div className="w-full lg:w-[55%]">
               {/* Pill Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-medical-error font-black text-[11px] uppercase tracking-widest border border-red-100 mb-5 animate-in fade-in slide-in-from-left duration-700">
                 <Activity size={12} className="animate-pulse" />
@@ -202,50 +202,50 @@ const BloodTests = () => {
               </div>
 
               {/* Headline */}
-              <h1 className="text-4xl lg:text-5xl font-black text-txt-dark leading-[1.1] mb-4 tracking-tight animate-in fade-in slide-in-from-left duration-1000">
+              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black text-txt-dark leading-[1.1] mb-6 tracking-tight animate-in fade-in slide-in-from-left duration-1000">
                 Expert{' '}
-                <span className="text-medical-error relative">
+                <span className="text-medical-error relative inline-block">
                   Diagnostic Tests
-                  <span className="absolute bottom-0.5 left-0 w-full h-[3px] rounded-full bg-medical-error/30" />
+                  <span className="absolute bottom-1 left-0 w-full h-[4px] rounded-full bg-medical-error/30" />
                 </span>
                 <br />
-                <span className="text-txt-secondary font-extrabold text-3xl lg:text-4xl">at Your Convenience.</span>
+                <span className="text-txt-secondary font-extrabold text-3xl lg:text-5xl mt-2 block">at Your Convenience.</span>
               </h1>
 
               {/* Subtext */}
-              <p className="text-base text-txt-secondary leading-relaxed mb-8 max-w-lg animate-in fade-in slide-in-from-left duration-1000 delay-200">
+              <p className="text-lg sm:text-lg md:text-xl text-txt-secondary leading-relaxed mb-10 w-full block animate-in fade-in slide-in-from-left duration-1000 delay-200">
                 Book premium blood tests from home or clinic. Certified reports within{' '}
                 <span className="font-bold text-txt-dark">24–48 hours</span> from India's leading NABL-accredited diagnostic centers.
               </p>
 
               {/* Trust Pills */}
-              <div className="flex flex-wrap gap-3 animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-400">
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-red-200 hover:shadow-md transition-all cursor-default group">
-                  <Droplet className="w-4 h-4 text-medical-error group-hover:scale-110 transition-transform" />
+              <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-2 duration-1000 delay-400">
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-red-200 hover:shadow-md transition-all cursor-default group">
+                  <Droplet className="w-5 h-5 text-medical-error group-hover:scale-110 transition-transform" />
                   <div>
-                    <p className="text-[9px] font-black text-txt-placeholder uppercase tracking-tight">Accreditation</p>
-                    <p className="text-xs font-black text-txt-dark">NABL Certified</p>
+                    <p className="text-[10px] font-black text-txt-placeholder uppercase tracking-widest">Accreditation</p>
+                    <p className="text-sm font-black text-txt-dark">NABL Certified</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-200 hover:shadow-md transition-all cursor-default group">
-                  <Microscope className="w-4 h-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-200 hover:shadow-md transition-all cursor-default group">
+                  <Microscope className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
                   <div>
-                    <p className="text-[9px] font-black text-txt-placeholder uppercase tracking-tight">Sample Pickup</p>
-                    <p className="text-xs font-black text-txt-dark">Free Doorstep</p>
+                    <p className="text-[10px] font-black text-txt-placeholder uppercase tracking-widest">Sample Pickup</p>
+                    <p className="text-sm font-black text-txt-dark">Free Doorstep</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-green-200 hover:shadow-md transition-all cursor-default group">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-green-200 hover:shadow-md transition-all cursor-default group">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
                   <div>
-                    <p className="text-[9px] font-black text-txt-placeholder uppercase tracking-tight">Reports</p>
-                    <p className="text-xs font-black text-txt-dark">Doctor Verified</p>
+                    <p className="text-[10px] font-black text-txt-placeholder uppercase tracking-widest">Reports</p>
+                    <p className="text-sm font-black text-txt-dark">Doctor Verified</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* ── Right Image ── */}
-            <div className="lg:w-[420px] animate-in fade-in zoom-in duration-1000 delay-300">
+            <div className="w-full lg:w-[40%] max-w-[420px] mx-auto lg:mx-0 animate-in fade-in zoom-in duration-1000 delay-300">
               <div className="relative p-2 bg-gradient-to-br from-white via-slate-100 to-slate-200 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/80">
                 <div className="absolute inset-0 bg-gradient-to-br from-red-200/20 to-blue-200/20 opacity-40 blur-2xl" />
                 <img
@@ -270,7 +270,7 @@ const BloodTests = () => {
       {/* ══════════════════════════════════════
           MAIN CONTENT CARD
       ══════════════════════════════════════ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-30 pb-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-30 pb-12">
         <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.07)] border border-slate-100 p-6 lg:p-10">
 
           {/* ── Offer Banner ── */}
@@ -403,7 +403,7 @@ const BloodTests = () => {
 
           {/* ── Bottom Features Row ── */}
           {!loading && filteredTests.length > 0 && (
-            <div className="mt-16 pt-12 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="mt-10 pt-10 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
                   icon: <Droplet size={24} />,

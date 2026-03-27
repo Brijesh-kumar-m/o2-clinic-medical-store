@@ -133,7 +133,7 @@ const BloodTestDetail = () => {
   if (!test) return <div className="p-20 text-center font-bold">Test not found</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-slate-50/50 pb-12">
       {/* Header Banner */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

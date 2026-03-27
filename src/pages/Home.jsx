@@ -88,7 +88,7 @@ const Home = () => {
       </div>
 
       {/* Trust Benefits Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="bg-white rounded-2xl shadow-sm border border-surface-border p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-brand-primary flex items-center justify-center">
@@ -130,7 +130,7 @@ const Home = () => {
       </section>
 
       {/* Today's Best Deals */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full bg-gradient-to-b from-surface-bg to-white rounded-3xl mb-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full bg-gradient-to-b from-surface-bg to-white rounded-3xl mb-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
           <div>
             <div className="flex items-center gap-2 text-medical-error mb-2 bg-red-50 w-fit px-3 py-1 rounded-full border border-red-100">
@@ -155,7 +155,7 @@ const Home = () => {
       </section>
 
       {/* Featured Banner - Professional/Clinical Style */}
-      <section className="mb-20">
+      <section className="mb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-txt-primary rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
             {/* Abstract Background Shapes */}
@@ -206,7 +206,7 @@ const Home = () => {
 
 
       {/* Popular Medicines */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 w-full">
         <div className="flex justify-between items-end mb-10">
           <div>
             <div className="flex items-center gap-2 text-brand-primary mb-2">
@@ -228,7 +228,7 @@ const Home = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
+        <div className="mt-10 text-center">
           <Link to="/products">
             <Button variant="outline" size="lg" className="px-12 rounded-full border-2 border-surface-border text-txt-secondary hover:text-brand-primary hover:border-brand-primary">
               View All 500+ Medicines
