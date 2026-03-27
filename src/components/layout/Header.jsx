@@ -43,7 +43,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-border shadow-sm">
       <div className="max-w-7xl mx-auto px-md sm:px-lg lg:px-xl">
-        <div className="flex justify-between items-center h-20 gap-4">
+        <div className="flex justify-between items-center h-16 md:h-20 gap-2 sm:gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0 group">
             <Logo className="w-10 h-10 transition-transform group-hover:scale-105" />
@@ -223,7 +223,7 @@ const Header = () => {
       </div>
 
       {/* Mobile Search */}
-      <div className="md:hidden px-md pb-4">
+      <div className="md:hidden px-4 pb-3">
         <form onSubmit={handleSearch} className="relative">
           <input
             type="text"
